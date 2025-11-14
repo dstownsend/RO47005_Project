@@ -1,0 +1,229 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>efd246bf-b67a-44aa-a744-b983304cb933</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>RO47005_Project.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>RO47005_Project</Name>
+    <RootNamespace>RO47005_Project</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="gym_envs_urdf\docs\source\conf.py" />
+    <Compile Include="gym_envs_urdf\examples\albert.py" />
+    <Compile Include="gym_envs_urdf\examples\boxer.py" />
+    <Compile Include="gym_envs_urdf\examples\dual_arm.py" />
+    <Compile Include="gym_envs_urdf\examples\generic_holonomic.py" />
+    <Compile Include="gym_envs_urdf\examples\heijn.py" />
+    <Compile Include="gym_envs_urdf\examples\iris.py" />
+    <Compile Include="gym_envs_urdf\examples\jackal.py" />
+    <Compile Include="gym_envs_urdf\examples\keyboard_input.py" />
+    <Compile Include="gym_envs_urdf\examples\mobile_reacher.py" />
+    <Compile Include="gym_envs_urdf\examples\mujoco_example.py" />
+    <Compile Include="gym_envs_urdf\examples\multi_robot.py" />
+    <Compile Include="gym_envs_urdf\examples\n_link_urdf_reacher.py" />
+    <Compile Include="gym_envs_urdf\examples\panda_capsules.py" />
+    <Compile Include="gym_envs_urdf\examples\panda_reacher.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_3dlidar_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_free_space_decomp.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_free_space_occupancy.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_full_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_lidar_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_obstacle_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_occupancy_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_reward.py" />
+    <Compile Include="gym_envs_urdf\examples\point_robot_sdf_sensor.py" />
+    <Compile Include="gym_envs_urdf\examples\prius.py" />
+    <Compile Include="gym_envs_urdf\examples\serializing_environments.py" />
+    <Compile Include="gym_envs_urdf\examples\test_examples.py" />
+    <Compile Include="gym_envs_urdf\examples\tiago.py" />
+    <Compile Include="gym_envs_urdf\setup.py" />
+    <Compile Include="gym_envs_urdf\tests\test_acc_envs.py" />
+    <Compile Include="gym_envs_urdf\tests\test_full_sensor.py" />
+    <Compile Include="gym_envs_urdf\tests\test_lidary_sensor.py" />
+    <Compile Include="gym_envs_urdf\tests\test_obstacle_sensor.py" />
+    <Compile Include="gym_envs_urdf\tests\test_reset.py" />
+    <Compile Include="gym_envs_urdf\tests\test_serialization.py" />
+    <Compile Include="gym_envs_urdf\tests\test_vel_envs.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\generic_mujoco\generic_mujoco_env.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\generic_mujoco\generic_mujoco_robot.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\generic_mujoco\__init__.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\keyboard_input\keyboard_input_responder.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\robots\generic_urdf\generic_diff_drive_robot.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\robots\generic_urdf\generic_urdf_reacher.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\robots\generic_urdf\__init__.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\robots\iris\iris.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\robots\iris\__init__.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\scene_examples\goal.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\scene_examples\obstacles.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\free_space_occupancy.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\fsd.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\fsd_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\full_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\grid_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\lidar.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\lidar_3d.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\mujoco\free_space_decomposition.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\mujoco\fsd_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\mujoco\lidar.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\mujoco\occupancy_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\mujoco_interface.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\obstacle_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\occupancy_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\physics_engine_interface.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\pybullet\free_space_decomposition.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\pybullet\fsd_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\pybullet\lidar.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\pybullet\occupancy_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\pybullet_interface.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\sdf_sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\sensor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\sensors\__init__.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\bicycle_model.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\differential_drive_robot.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\generic_robot.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\helpers.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\holonomic_robot.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\plane.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\pybullet_helpers.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\quadrotor.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\reward.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\urdf_env.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\urdf_common\__init__.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\wrappers\sb3_float32_action_wrapper.py" />
+    <Compile Include="gym_envs_urdf\urdfenvs\__init__.py" />
+    <Compile Include="RO47005_Project.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="gym_envs_urdf\" />
+    <Folder Include="gym_envs_urdf\.github\" />
+    <Folder Include="gym_envs_urdf\.github\workflows\" />
+    <Folder Include="gym_envs_urdf\docs\" />
+    <Folder Include="gym_envs_urdf\docs\source\" />
+    <Folder Include="gym_envs_urdf\docs\source\generated\" />
+    <Folder Include="gym_envs_urdf\docs\source\img\" />
+    <Folder Include="gym_envs_urdf\docs\source\_static\" />
+    <Folder Include="gym_envs_urdf\examples\" />
+    <Folder Include="gym_envs_urdf\examples\meshes\" />
+    <Folder Include="gym_envs_urdf\examples\meshes\ur5\" />
+    <Folder Include="gym_envs_urdf\examples\meshes\ur5\collision\" />
+    <Folder Include="gym_envs_urdf\examples\meshes\ur5\visual\" />
+    <Folder Include="gym_envs_urdf\tests\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\assets\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\assets\panda\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\generic_mujoco\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\keyboard_input\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\robots\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\robots\generic_urdf\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\robots\iris\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\scene_examples\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\sensors\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\sensors\mujoco\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\sensors\pybullet\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\urdf_common\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\urdf_common\meshes\" />
+    <Folder Include="gym_envs_urdf\urdfenvs\wrappers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="gym_envs_urdf\.github\workflows\create_release.yml" />
+    <Content Include="gym_envs_urdf\.github\workflows\docs_pages.yaml" />
+    <Content Include="gym_envs_urdf\.github\workflows\pylint.yml" />
+    <Content Include="gym_envs_urdf\.github\workflows\unitTest.yml" />
+    <Content Include="gym_envs_urdf\.gitignore" />
+    <Content Include="gym_envs_urdf\.pylintrc" />
+    <Content Include="gym_envs_urdf\CHANGELOG.md" />
+    <Content Include="gym_envs_urdf\CITATION.cff" />
+    <Content Include="gym_envs_urdf\cliff.toml" />
+    <Content Include="gym_envs_urdf\docs\.gitignore" />
+    <Content Include="gym_envs_urdf\docs\make.bat" />
+    <Content Include="gym_envs_urdf\docs\Makefile" />
+    <Content Include="gym_envs_urdf\docs\source\adding_to_envs.rst" />
+    <Content Include="gym_envs_urdf\docs\source\api.rst" />
+    <Content Include="gym_envs_urdf\docs\source\contributing.rst" />
+    <Content Include="gym_envs_urdf\docs\source\dependencies.rst" />
+    <Content Include="gym_envs_urdf\docs\source\developers.rst" />
+    <Content Include="gym_envs_urdf\docs\source\generated\urdfenvs.rst" />
+    <Content Include="gym_envs_urdf\docs\source\generated\urdfenvs.urdfCommon.rst" />
+    <Content Include="gym_envs_urdf\docs\source\getting_started.rst" />
+    <Content Include="gym_envs_urdf\docs\source\img\albert.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\boxerRobot.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\panda.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\panda_without_gripper.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\panda_without_gripper.mp4" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobot.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobot.mp4" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobot.png" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobotKeyboardInput.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobotKeyboardInput.png" />
+    <Content Include="gym_envs_urdf\docs\source\img\pointRobot_mujoco.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\tiago.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\tiagoKeyboardInput.gif" />
+    <Content Include="gym_envs_urdf\docs\source\img\wsl2.png" />
+    <Content Include="gym_envs_urdf\docs\source\index.rst" />
+    <Content Include="gym_envs_urdf\docs\source\introduction.rst" />
+    <Content Include="gym_envs_urdf\docs\source\introduction_to_envs.rst" />
+    <Content Include="gym_envs_urdf\docs\source\windows.rst" />
+    <Content Include="gym_envs_urdf\docs\source\_static\pointRobot.mp4" />
+    <Content Include="gym_envs_urdf\examples\.gitignore" />
+    <Content Include="gym_envs_urdf\examples\.pylintrc" />
+    <Content Include="gym_envs_urdf\examples\heijn_robot.urdf" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\base.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\forearm.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\shoulder.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\upperarm.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\wrist1.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\wrist2.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\collision\wrist3.stl" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\base.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\forearm.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\shoulder.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\upperarm.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\wrist1.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\wrist2.obj" />
+    <Content Include="gym_envs_urdf\examples\meshes\ur5\visual\wrist3.obj" />
+    <Content Include="gym_envs_urdf\examples\pointRobot.urdf" />
+    <Content Include="gym_envs_urdf\examples\ur5.urdf" />
+    <Content Include="gym_envs_urdf\LICENSE" />
+    <Content Include="gym_envs_urdf\poetry.lock" />
+    <Content Include="gym_envs_urdf\pyproject.toml" />
+    <Content Include="gym_envs_urdf\README.md" />
+    <Content Include="gym_envs_urdf\tests\.gitignore" />
+    <Content Include="gym_envs_urdf\urdfenvs\assets\panda\panda_scene_temp.xml" />
+    <Content Include="gym_envs_urdf\urdfenvs\keyboard_input\.gitignore" />
+    <Content Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\duck.obj" />
+    <Content Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\duck.urdf" />
+    <Content Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\duck_vhacd.obj" />
+    <Content Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\sphere_goal.urdf" />
+    <Content Include="gym_envs_urdf\urdfenvs\scene_examples\obstacle_data\sphere_smooth.obj" />
+    <Content Include="gym_envs_urdf\urdfenvs\sensors\.gitignore" />
+    <Content Include="gym_envs_urdf\urdfenvs\urdf_common\.gitignore" />
+    <Content Include="gym_envs_urdf\urdfenvs\urdf_common\meshes\checker_blue.png" />
+    <Content Include="gym_envs_urdf\urdfenvs\urdf_common\meshes\plane.mtl" />
+    <Content Include="gym_envs_urdf\urdfenvs\urdf_common\meshes\plane.obj" />
+    <Content Include="gym_envs_urdf\urdfenvs\urdf_common\plane.urdf" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
