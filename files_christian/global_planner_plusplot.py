@@ -73,7 +73,6 @@ def plot_waypoints(waypoints):
     plt.legend()
     plt.show()
 
-
 # input_pose = np.array([0.0, 0.0, 0.0])
 # final_pose = np.array([5.0, 3.0, 0.0])
 # wps = global_planner(input_pose, final_pose, 20)

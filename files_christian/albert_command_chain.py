@@ -61,7 +61,6 @@ def run_albert(n_steps_max=10000, render=False, goal=True, obstacles=True,input_
     env.close()
 
 
-
 if __name__ == "__main__":
     show_warnings = False
     warning_flag = "default" if show_warnings else "ignore"
