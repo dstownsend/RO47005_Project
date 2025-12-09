@@ -7,6 +7,7 @@ from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
 from global_planners import rrtstar #,dumb_global_planner
 # from local_planners import dumb_local_planner
+from local_planners import mpc
 
 N_STEPS = 1000
 BASE_START = (0,0)
@@ -24,7 +25,7 @@ def main():
     
     # 1. Setup planners
     global_planner = rrtstar.RRTStar()
-    # local_planner = mpc.MPC()
+    local_planner = mpc.create_mpc_planner()
     logger.info("Global path: ")
     
     # 2a. Navigation global plan
@@ -36,10 +37,13 @@ def main():
             # 2b. Navigation local replan (dynamic obs)
             # TODO: get control from local planner, fill action
             # TODO: once done, switch phase to move_arm
-            # vehicle_control = local_planner.plan()
+            current_state = np.array([0.0, 0.0, 0.0])
+            goal_state = np.array([1.0, 1.0, 0.0])
+            vehicle_control = local_planner.plan(current_state, goal_state, None)
+            print(vehicle_control)
             # action[:2] = vehicle_control
             # logger.info("in phase: move_base")
-            pass
+            # pass
 
         elif phase == "move_arm":            
             # 3. Manipulation task
