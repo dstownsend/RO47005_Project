@@ -136,26 +136,32 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     q0 = [0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5]
     
     q0_cart = list(p.getLinkState(robot_id,hand_id)[4])
-    q0_cart[0] += -0.3
-    q0_cart[2] += -0.3
     
     print(f"{q0_cart}\n")    
     
     q1_cart = list(q0_cart)
-    q1_cart[0] += 0.2
+    q1_cart[0] += 0.4
 
     
     q2_cart = list(q1_cart)
-    q2_cart[2] -= 0.2
+    q2_cart[2] -= 0.4
 
+    q3_cart = list(q2_cart)
+    q3_cart[0] -= 0.4
+    
+    q4_cart = q1_cart
     
     traj_cart1 = linear_interpolate(q0_cart, q1_cart, 1000)
     traj_cart2 = linear_interpolate(q1_cart, q2_cart, 1000)
+    traj_cart3 = linear_interpolate(q2_cart, q3_cart, 1000)
+    traj_cart4 = linear_interpolate(q3_cart, q4_cart, 1000)
     
     traj_cart1 = np.array(traj_cart1)
     traj_cart2 = np.array(traj_cart2)
+    traj_cart3 = np.array(traj_cart3)
+    traj_cart4 = np.array(traj_cart4)
     
-    traj_cart = np.vstack((traj_cart1,traj_cart2))
+    traj_cart = np.vstack((traj_cart1,traj_cart2,traj_cart3,traj_cart4))
 
     print(traj_cart.shape)
 
@@ -208,37 +214,37 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
         pos_deg = math.degrees(pos_rad)
         
         action = np.zeros(env.n()) #11
-        #if i < len(traj_cart):
+        if i < len(traj_cart):
             
-        K = 4.0
-        
-        current_cart = list(p.getLinkState(robot_id,hand_id)[4])
-        error_cart = np.array(q1_cart) - current_cart            
-        #error_cart = traj_cart[i] - current_cart
-        
-        cmd_vel = K * error_cart           
-        
-        
-        
-        pos, vel, torqs = getJointStates(robot_id) #returns length 25            
-        mpos, mvel, mtorq = getMotorJointStates(robot_id) #returns length 13            
-        result = p.getLinkState(robot_id,
-                                hand_id,
-                                computeLinkVelocity=1,
-                                computeForwardKinematics=1)
-        link_trn, link_rot, com_trn, com_rot, frame_pos, frame_rot, link_vt, link_vr = result
-        zero_vec = [0.0] * len(mpos)
-        jac_t, jac_r = p.calculateJacobian(robot_id, hand_id, com_trn, mpos, zero_vec, zero_vec) #19
-        
-       
-        J = np.array(jac_t)
-        dq = np.linalg.pinv(J) @ cmd_vel
-        #dq = dq[-8:]
-        print()            
-        print(dq)
+            K = 10.0
+            
+            current_cart = list(p.getLinkState(robot_id,hand_id)[4])
+            #error_cart = np.array(q1_cart) - current_cart            
+            error_cart = traj_cart[i] - current_cart
+            
+            cmd_vel = K * error_cart           
+            
+            
+            
+            pos, vel, torqs = getJointStates(robot_id) #returns length 25            
+            mpos, mvel, mtorq = getMotorJointStates(robot_id) #returns length 13            
+            result = p.getLinkState(robot_id,
+                                    hand_id,
+                                    computeLinkVelocity=1,
+                                    computeForwardKinematics=1)
+            link_trn, link_rot, com_trn, com_rot, frame_pos, frame_rot, link_vt, link_vr = result
+            zero_vec = [0.0] * len(mpos)
+            jac_t, jac_r = p.calculateJacobian(robot_id, hand_id, com_trn, mpos, zero_vec, zero_vec) #19
+            
+           
+            J = np.array(jac_t)
+            dq = np.linalg.pinv(J) @ cmd_vel
+            #dq = dq[-8:]
+            print()            
+            print(dq)
 
-        action[2:8] = dq[2:8]
-            
+            action[2:7] = dq[2:7]
+           
             
             
             #q_desired = p.calculateInverseKinematics(robot_id, hand_id, traj_cart[i])
