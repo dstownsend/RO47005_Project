@@ -28,10 +28,12 @@ def getMotorJointStates(robot):
   joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
   joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
   joint_states = [j for j, i in zip(joint_states, joint_infos) if i[3] > -1]
+  joint_names = [joint[1] for joint in joint_infos if joint[3] > -1]
   joint_positions = [state[0] for state in joint_states]
   joint_velocities = [state[1] for state in joint_states]
   joint_torques = [state[3] for state in joint_states]
-  return joint_positions, joint_velocities, joint_torques
+
+  return joint_positions, joint_velocities, joint_torques, joint_names
 
 ### Supporting Functions ###
 def plot_2D_path(path):
@@ -48,6 +50,18 @@ def plot_2D_path(path):
     plt.legend()
     plt.show()
 
+def plot_joint_state(joint_data):
+    joint_data = np.asarray(joint_data)
+    plt.figure(figsize=(6, 6))
+    xs = range(joint_data.shape[0])
+    
+    for i in range(joint_data.shape[1]):
+        if i > 2:
+            plt.plot(xs, joint_data[:,i], 'o-', label=i)
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
 def update_sphere(robot_id, joint_index, sphere_id):
     # Get world pose of the link attached to the joint
     link_state = p.getLinkState(robot_id, joint_index)
@@ -57,6 +71,22 @@ def update_sphere(robot_id, joint_index, sphere_id):
     # Move the sphere to follow the joint
     p.resetBasePositionAndOrientation(sphere_id, pos, orn)
 
+def draw_trajectory(points, color=[1,0,0], width=2, life_time=0):
+    """
+    points: list of [x, y, z] positions
+    color: RGB (0–1)
+    width: line thickness
+    life_time: 0 = permanent
+    """
+    for i in range(len(points)-1):
+        p.addUserDebugLine(
+            points[i],
+            points[i+1],
+            color,
+            lineWidth=width,
+            lifeTime=life_time
+        )
+
 
 ### Path Generation ###
 def linear_interpolate(q0, q1, n_steps):
@@ -64,6 +94,22 @@ def linear_interpolate(q0, q1, n_steps):
     q1 = np.array(q1, dtype=float)
     traj = [(q0 + (q1 - q0) * (i / (n_steps-1))) for i in range(n_steps) ]
     return traj
+    
+    
+def cubic_interpolate(q0, q1, n_steps):
+    q0 = np.asarray(q0, dtype=float)
+    q1 = np.asarray(q1, dtype=float)
+
+    result = []
+    for i in range(n_steps):
+        t = i / (n_steps - 1)
+        h = 3 * t**2 - 2 * t**3  # cubic smoothstep
+        qi = (1 - h) * q0 + h * q1
+        result.append(qi)
+
+    return result
+    
+    
 
 ### Velocity Control ###
 def compute_joint_vel(q_current, q_desired, dt, max_vel=1.0):
@@ -103,9 +149,14 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
         
     action = np.zeros(env.n())
     
+    for _ in range(100):
+        ob, *_ = env.step(action)
+    
+    
     #getJointStates A1 to A7 = 7 to 14   
     #action A1 to A7 = 2 to 9  
     joint_indices = range(7,15)
+
 
     num_joints = 24
     joint_num = 1
@@ -132,16 +183,16 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     ## Single joint action   
     #action[joint_num + 1] = -0.5
     
-    ## Linear trajectory   
-    q0 = [0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5]
-    
+    ## Linear trajectory  
+    ikSolver = 0    
     q0_cart = list(p.getLinkState(robot_id,hand_id)[4])
     
-    print(f"{q0_cart}\n")    
+    mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13   
+    print(f"{mpos}\n")
+    print(f"{names}\n")
     
     q1_cart = list(q0_cart)
     q1_cart[0] += 0.4
-
     
     q2_cart = list(q1_cart)
     q2_cart[2] -= 0.4
@@ -149,21 +200,82 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     q3_cart = list(q2_cart)
     q3_cart[0] -= 0.4
     
-    q4_cart = q1_cart
+    q4_cart = q0_cart
     
-    traj_cart1 = linear_interpolate(q0_cart, q1_cart, 1000)
-    traj_cart2 = linear_interpolate(q1_cart, q2_cart, 1000)
-    traj_cart3 = linear_interpolate(q2_cart, q3_cart, 1000)
-    traj_cart4 = linear_interpolate(q3_cart, q4_cart, 1000)
-    
-    traj_cart1 = np.array(traj_cart1)
-    traj_cart2 = np.array(traj_cart2)
-    traj_cart3 = np.array(traj_cart3)
-    traj_cart4 = np.array(traj_cart4)
-    
-    traj_cart = np.vstack((traj_cart1,traj_cart2,traj_cart3,traj_cart4))
+    jointPoses0 = p.calculateInverseKinematics(robot_id,
+                      hand_id,
+                      q0_cart,
+                      solver=ikSolver)
 
-    print(traj_cart.shape)
+    print(jointPoses0)     
+    jointPoses0 = jointPoses0[:7]
+    
+
+    #jointPoses0[0] += math.radians(45)
+                   
+    print(jointPoses0)     
+                      
+    jointPoses1 = p.calculateInverseKinematics(robot_id,
+                      hand_id,
+                      q1_cart,
+                      solver=ikSolver)[:7]
+    jointPoses2 = p.calculateInverseKinematics(robot_id,
+                      hand_id,
+                      q2_cart,
+                      solver=ikSolver)[:7]
+    jointPoses3 = p.calculateInverseKinematics(robot_id,
+                      hand_id,
+                      q3_cart,
+                      solver=ikSolver)[:7]
+    jointPoses4 = p.calculateInverseKinematics(robot_id,
+                      hand_id,
+                      q4_cart,
+                      solver=ikSolver)[:7]
+                      
+    jointPoses0 = np.asarray(jointPoses0)
+    jointPoses1 = np.asarray(jointPoses1)
+    jointPoses2 = np.asarray(jointPoses2)
+    jointPoses3= np.asarray(jointPoses3)
+    jointPoses4= np.asarray(jointPoses4)
+
+
+    #for idx in range(len(jointPoses1)):
+     #   p.resetJointState(robot_id, idx+7, jointPoses2[idx]);
+                  
+              
+    
+    
+    
+    traj_joint1 = cubic_interpolate(jointPoses0, jointPoses1, 500)
+    traj_joint2 = cubic_interpolate(jointPoses1, jointPoses2, 500)
+    traj_joint3 = cubic_interpolate(jointPoses2, jointPoses3, 500)
+    traj_joint4 = cubic_interpolate(jointPoses3, jointPoses4, 500)
+    
+    traj_joint1 = np.array(traj_joint1)
+    traj_joint2 = np.array(traj_joint2)
+    traj_joint3 = np.array(traj_joint3)
+    traj_joint4 = np.array(traj_joint4)
+    
+    traj_joint = np.vstack((traj_joint1,traj_joint2,traj_joint3,traj_joint4))
+
+    print(len(q2_cart))
+    
+    way_points = []
+    way_points.append(q0_cart)
+    way_points.append(q1_cart)
+    way_points.append(q2_cart)
+    way_points.append(q3_cart)
+    way_points.append(q0_cart)
+    
+    draw_trajectory(way_points)
+    
+    #plot_joint_state(traj_joint)
+    
+    
+    
+    
+
+    
 
 ## Visualisation
     start_pos = p.createVisualShape(
@@ -203,68 +315,44 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     )
     
     
+    joint_pose_data = []
     
     history = []
     path2D = []
+    trajectory = []
+
+    
     for i in range(n_steps):
         ob, *_ = env.step(action)
         history.append(ob)
 
-        pos_rad = p.getJointStates(robot_id,[6+joint_num])[0][0]
-        pos_deg = math.degrees(pos_rad)
-        
         action = np.zeros(env.n()) #11
-        if i < len(traj_cart):
+        
+        if i < len(traj_joint):
+            K = 1
             
-            K = 10.0
-            
+            mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
+
+            current_joint_pos = mpos[:7]
             current_cart = list(p.getLinkState(robot_id,hand_id)[4])
-            #error_cart = np.array(q1_cart) - current_cart            
-            error_cart = traj_cart[i] - current_cart
-            
-            cmd_vel = K * error_cart           
-            
-            
-            
-            pos, vel, torqs = getJointStates(robot_id) #returns length 25            
-            mpos, mvel, mtorq = getMotorJointStates(robot_id) #returns length 13            
-            result = p.getLinkState(robot_id,
-                                    hand_id,
-                                    computeLinkVelocity=1,
-                                    computeForwardKinematics=1)
-            link_trn, link_rot, com_trn, com_rot, frame_pos, frame_rot, link_vt, link_vr = result
-            zero_vec = [0.0] * len(mpos)
-            jac_t, jac_r = p.calculateJacobian(robot_id, hand_id, com_trn, mpos, zero_vec, zero_vec) #19
-            
-           
-            J = np.array(jac_t)
-            dq = np.linalg.pinv(J) @ cmd_vel
-            #dq = dq[-8:]
-            print()            
-            print(dq)
 
-            action[2:7] = dq[2:7]
+            error_joint = traj_joint[i] - current_joint_pos
+
+            
+            cmd_vel = K * error_joint          
+            cmd_vel = np.clip(cmd_vel, -1.0, 1.0)
+
+            #print(f"{names[0]}, {jointPoses0[0]}, {mpos[0]}, {error_joint[0]}")
+
+            trajectory.append(current_cart)
+
+            
+            action[2:9] = cmd_vel
+            
+
            
             
-            
-            #q_desired = p.calculateInverseKinematics(robot_id, hand_id, traj_cart[i])
-            #q_desired = q_desired[5:]
-            
-            #q_current = [p.getJointState(robot_id, j)[0] for j in joint_indices]
-            
-            #joint_velocities = compute_joint_vel(q_current, q_desired, env.dt, max_vel=1.5)
-            
-            #print(joint_velocities)
-
-            #action[2:10] = joint_velocities
-
-        
-        
-        #hand_pos = p.getLinkState(robot_id,hand_id)
-        #path2D.append(hand_pos[4][0:2])
-       	#if pos_deg < -90:
-       	#    break
-        #print(f"{pos_deg}")
+           
         
         
         
