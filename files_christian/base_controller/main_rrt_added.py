@@ -6,10 +6,9 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import rrtstar #,dumb_global_planner
-# from local_planners import dumb_local_planner
 
 from global_planner_rrt import RRT_planner
+# from local_planners import dumb_local_planner
 
 
 N_STEPS = 1000

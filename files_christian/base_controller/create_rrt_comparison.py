@@ -5,7 +5,7 @@ import math
 import plotly
 import plotly.graph_objects as go
 
-class layered_RRT_results:
+class RRT_type_comparison:
     def __init__(self,X_dimensions,obstacles,q,r,max_samples,rewire_count,x_init,x_goal,prc):
         self.X_dimensions = X_dimensions
         self.obstacles = obstacles

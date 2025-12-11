@@ -1,4 +1,4 @@
-from layered_global_planner_results import layered_RRT_results
+from files_christian.base_controller.create_rrt_comparison import RRT_type_comparison
 import numpy as np
 
 X_dimensions = np.array([(0, 10), (0, 10)])
@@ -18,7 +18,7 @@ prc = 0.1             # goal bias
 x_init = (0.5, 0.5)
 x_goal = (9.0, 9.0)
 
-layers = layered_RRT_results(
+layers = RRT_type_comparison(
     X_dimensions, obstacles, q, r,
     max_samples, rewire_count,
     x_init, x_goal, prc
