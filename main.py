@@ -29,7 +29,7 @@ logger.setLevel(logging.INFO)
 
 def main():
     # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="one_static") #empty, one_static, dynamic_and_static
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static
     ob = env.reset(
         pos=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
     )[0]
@@ -72,7 +72,7 @@ def main():
     joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
 
     for idx in range(len(joint_home_pose)):
-        p.resetJointState(robot_id, idx+7, joint_home_pose[idx]);
+        p.resetJointState(robot_id, idx+7, joint_home_pose[idx])
         
     for _ in range(100):
         ob, *_ = env.step(np.zeros(11))
@@ -171,10 +171,7 @@ def create_env_with_obstacles(
 
     # Get Scenario Config
     scenario_cfg = {}
-    if randomize:
-        _, scenario_cfg = get_random_training_scenario()
-    else:
-        scenario_cfg = get_scenario(scenario_name)
+    scenario_cfg = get_scenario(scenario_name)
     
     # Spawn in walls and obstacles returns obstacle dictionary (walls, static, dynamic)
     obs = apply_scenario_to_env(env, scenario_cfg)
