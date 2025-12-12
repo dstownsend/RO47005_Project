@@ -23,7 +23,8 @@ class RRT_planner:
         plot.plot_tree(X, rrt.trees)
         if path is not None:
             plot.plot_path(X, path)
-        plot.plot_obstacles(X, obstacles)
+        if obstacles is not None:
+            plot.plot_obstacles(X, obstacles)
         plot.plot_start(X, x_init)
         plot.plot_goal(X, x_goal)
         plot.draw(auto_open=True)
