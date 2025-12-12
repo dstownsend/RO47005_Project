@@ -5,7 +5,7 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import rrtstar, arm_cubic #,dumb_global_planner
+from global_planners import global_planner_rrt, arm_cubic #,dumb_global_planner
 from controllers.arm_controller import ArmController
 
 import math
@@ -33,7 +33,7 @@ def main():
     )[0]
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
-    phase = "move_arm"
+    phase = "move_base"
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
