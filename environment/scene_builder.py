@@ -85,10 +85,11 @@ def _linear_trajectory_exprs(
 
 def build_room_walls(
     wall_length: float = 10.0,
-    wall_height: float = 4.0,
+    wall_height: float = 2.0,
     thickness: float = 0.1,
-    z_center: float = 2.0,
+    z_center: float = 1.0,
     name_prefix: str = "wall",
+    wall_rgba: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
 ):
     walls = []
 
@@ -106,6 +107,7 @@ def build_room_walls(
                 },
                 "low": {"position": [wall_length / 2.0, 0.0, z_center]},
                 "high": {"position": [wall_length / 2.0, 0.0, z_center]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -124,6 +126,7 @@ def build_room_walls(
                 },
                 "low": {"position": [0.0, wall_length / 2.0, z_center]},
                 "high": {"position": [0.0, wall_length / 2.0, z_center]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -142,6 +145,7 @@ def build_room_walls(
                 },
                 "low": {"position": [0.0, -wall_length / 2.0, z_center]},
                 "high": {"position": [0.0, -wall_length / 2.0, z_center]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -160,6 +164,7 @@ def build_room_walls(
                 },
                 "low": {"position": [-wall_length / 2.0, 0.0, z_center]},
                 "high": {"position": [-wall_length / 2.0, 0.0, z_center]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -171,13 +176,14 @@ def build_room_walls(
             content_dict={
                 "type": "box",
                 "geometry": {
-                    "position": [-3.0, -3.5, 1.5],
+                    "position": [-3.0, -3.5, 1],
                     "width": 3,
-                    "height": 3,
+                    "height": 2,
                     "length": 0.1,
                 },
-                "low": {"position": [4.0, -3.5, 1.5]},
-                "high": {"position": [4.0, -3.5, 1.5]},
+                "low": {"position": [4.0, -3.5, 1.0]},
+                "high": {"position": [4.0, -3.5, 1.0]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -190,13 +196,14 @@ def build_room_walls(
                 "type": "box",
                 "geometry": {
                     # "position": [4.0, 2.0, 2.0], # position for testing height directly at spawn
-                    "position": [-4.0, -2.0, 2.0], # position at hub
+                    "position": [-4.0, -2.0, 1.5], # position at hub
                     "width": 0.1,
-                    "height": 2.0,
+                    "height": 1.0,
                     "length": 2.0,
                 },
-                "low": {"position": [-4.0, -2.0, 2.0]},
-                "high": {"position": [-4.0, -2.0, 2.0]},
+                "low": {"position": [-4.0, -2.0, 1.5]},
+                "high": {"position": [-4.0, -2.0, 1.5]},
+                "rgba": list(wall_rgba),
             },
         )
     )
@@ -222,6 +229,7 @@ def build_moving_sphere(
     name: str,
     trajectory_exprs,
     radius: float = 0.5,
+    rgba=(1.0, 0.0, 0.0, 1.0),
 ):
     content_dict = {
         "type": "sphere",
@@ -229,6 +237,7 @@ def build_moving_sphere(
             "trajectory": trajectory_exprs,
             "radius": radius,
         },
+        "rgba": list(rgba),
         "movable": False,
     }
     return DynamicSphereObstacle(name=name, content_dict=content_dict)
@@ -239,6 +248,7 @@ def build_moving_cylinder(
     trajectory_exprs,
     radius: float = 0.5,
     height: float = 2.0,
+    rgba=(1.0, 0.0, 0.0, 1.0),
 ):
     content_dict = {
         "type": "cylinder",
@@ -247,6 +257,7 @@ def build_moving_cylinder(
             "radius": radius,
             "height": height,
         },
+        "rgba": list(rgba),
         "movable": False,
     }
     return DynamicCylinderObstacle(name=name, content_dict=content_dict)
@@ -270,6 +281,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
                     "heading": [...],  # unit vector, zeros if stationary
                     "radius": r,
                     "type": "sphere" | "cylinder",
+                    "rgba": [r, g, b, a],
                 }
             ],
         }
@@ -309,6 +321,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
     # 3) Dynamic obstacles
     for j, d_cfg in enumerate(scenario_cfg["dynamic"]):
         dynamic_type = d_cfg.get("type", "sphere")
+        dynamic_rgba = d_cfg.get("rgba", (1.0, 0.0, 0.0, 1.0))
 
         if "trajectory" in d_cfg:
             # Backward-compatible manual expressions.
@@ -331,12 +344,14 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
                 trajectory_exprs=trajectory_exprs,
                 radius=d_cfg.get("radius", 0.5),
                 height=d_cfg.get("height", 2.0),
+                rgba=dynamic_rgba,
             )
         else:
             dyn = build_moving_sphere(
                 name=f"dynamic_{j}",
                 trajectory_exprs=trajectory_exprs,
                 radius=d_cfg.get("radius", 0.5),
+                rgba=dynamic_rgba,
             )
         prev_ids = set(env.get_obstacles().keys())
         env.add_obstacle(dyn)
@@ -385,6 +400,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
                     if traj_meta
                     else {}
                 ),
+                "rgba": list(dynamic_rgba),
             }
         )
 

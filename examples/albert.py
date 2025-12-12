@@ -35,8 +35,9 @@ def run_albert(conn, n_steps=10000, render=True, goal=True, obstacles=True):
     for _ in range(n_steps):
         conn.send({"request_action": True, "kill_child": False})
         keyboard_data = conn.recv()
-        action[2:4] = keyboard_data["action"]
+        action[0:2] = keyboard_data["action"]
         ob, *_ = env.step(action)
+        print(f"robot pos: {ob['robot_0']['joint_state']['position'][:3]}")
         history.append(ob)
     env.close()
     conn.send({"request_action": False, "kill_child": True})
