@@ -5,7 +5,12 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import global_planner_rrt #,dumb_global_planner
+from global_planners import rrtstar, arm_cubic #,dumb_global_planner
+from controllers.arm_controller import ArmController
+
+import math
+import pybullet as p
+
 # from local_planners import dumb_local_planner
 from local_planners import mpc
 
@@ -28,7 +33,7 @@ def main():
     )[0]
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
-    phase = "move_base"
+    phase = "move_arm"
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
@@ -52,7 +57,19 @@ def main():
     global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=False)
     logger.info(f"GLOBAL PATH IS: {global_path}")
     
-    action = np.zeros(env.n())
+    
+    arm_global_planner = arm_cubic.ArmCubicPlanner()
+    arm_controller = ArmController()
+    robot_id = env._robots[0]._robot 
+
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
+    joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
+
+    for idx in range(len(joint_home_pose)):
+        p.resetJointState(robot_id, idx+7, joint_home_pose[idx]);
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
 
     # Main loop
     action = np.zeros(env.n())
@@ -74,10 +91,15 @@ def main():
 
         elif phase == "move_arm":            
             # 3. Manipulation task
-            # TODO: get control and fill action
-            # joint_velocities = some_arm_planner.plan()
-            # action[2:9] = joint_velocities
-            pass
+            if not arm_controller.goal_reached:
+                if arm_controller.path is None:
+                	arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                
+                action = arm_controller.compute_vel(robot_id)
+            else:
+               action = np.zeros(env.n()) 
+
+            
         
         # Sync dynamic obstacle state for planners
         obstacles = refresh_dynamic_obstacle_states(env, obstacles)
@@ -88,6 +110,8 @@ def main():
 
 
         # Simulation step
+        #action = np.zeros(env.n())
+        #action[0] = 0.2 # drive forward
         ob, reward, terminated, truncated, info  = env.step(action)
         logger.info(f"robot pos: {ob['robot_0']['joint_state']['position'][:3]}")
         if terminated:
@@ -118,7 +142,7 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([4.0, 4.0, 0.0,
+    pos = np.array([-4.0, -1.0, 0.0,
                     0.0, 0.7, 0.0, -1.0, 0.0, 1.0, 0.0,
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
@@ -136,8 +160,8 @@ def create_env_with_obstacles(
     obs = apply_scenario_to_env(env, scenario_cfg)
 
     # Camera perspectives
-    env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
-    # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
+    # env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
+    env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
     # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
 
     return env, robots, obs
