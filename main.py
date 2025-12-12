@@ -6,7 +6,12 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import global_planner_rrt #,dumb_global_planner
+from global_planners import global_planner_rrt, arm_cubic #,dumb_global_planner
+from controllers.arm_controller import ArmController
+
+import math
+import pybullet as p
+
 # from local_planners import dumb_local_planner
 from local_planners import mpc
 
@@ -56,6 +61,20 @@ def main():
     action = np.zeros(env.n())
     next_vertex = global_path.pop(0)
     goal_state = np.append(next_vertex, 0.0)
+    
+    arm_global_planner = arm_cubic.ArmCubicPlanner()
+    arm_controller = ArmController()
+    robot_id = env._robots[0]._robot 
+
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
+    joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
+
+    for idx in range(len(joint_home_pose)):
+        p.resetJointState(robot_id, idx+7, joint_home_pose[idx]);
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
+
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
@@ -85,10 +104,15 @@ def main():
             logger.info("in phase: move_arm")
     
             # 3. Manipulation task
-            # TODO: get control and fill action
-            # joint_velocities = some_arm_planner.plan()
-            # action[2:9] = joint_velocities
-            pass
+            if not arm_controller.goal_reached:
+                if arm_controller.path is None:
+                    arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                
+                action = arm_controller.compute_vel(robot_id)
+            else:
+               action = np.zeros(env.n()) 
+
+            
         
         # Sync dynamic obstacle state for planners
         obstacles = refresh_dynamic_obstacle_states(env, obstacles)
@@ -98,6 +122,8 @@ def main():
             # print(f"Dynamic obstacle 0 position @t={env.t():.2f}: {dyn_pos}")
 
         # Simulation step
+        #action = np.zeros(env.n())
+        #action[0] = 0.2 # drive forward
         ob, reward, terminated, truncated, info  = env.step(action)
         logger.debug(f"robot pos: {ob['robot_0']['joint_state']['position'][:3]}")
         if terminated:
@@ -148,6 +174,8 @@ def create_env_with_obstacles(
     # Camera perspectives
     env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
     # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
+    # env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
+    # env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
     # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
 
     return env, robots, obs
@@ -157,10 +185,10 @@ def sphere_to_square(obstacles):
     obs = obstacles['static']
     sq_obs = []
     for el in obs:
-        x_min = el['position'][0]-el['radius']
-        y_min = el['position'][1]-el['radius']
-        x_max = el['position'][0]+el['radius']
-        y_max = el['position'][1]+el['radius']
+        x_min = el['position'][0]-1.3*el['radius']
+        y_min = el['position'][1]-1.3*el['radius']
+        x_max = el['position'][0]+1.3*el['radius']
+        y_max = el['position'][1]+1.3*el['radius']
         sq_obs.append((x_min,y_min,x_max,y_max))
     return np.array(sq_obs) if len(sq_obs)>0 else None
     
