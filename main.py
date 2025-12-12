@@ -5,7 +5,7 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import rrtstar #,dumb_global_planner
+from global_planners import global_planner_rrt #,dumb_global_planner
 # from local_planners import dumb_local_planner
 from local_planners import mpc
 
@@ -13,8 +13,8 @@ from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obs
 from environment.scenarios import get_scenario, get_random_training_scenario
 
 N_STEPS = 1000
-BASE_START = (0,0)
-BASE_GOAL = (5,5)
+BASE_START = (4,4)
+BASE_GOAL = (-4,-1)
 # ARM_START =
 # ARM_GOAL =
 logger = logging.getLogger(__name__)
@@ -22,30 +22,47 @@ logger.setLevel(logging.INFO)
 
 def main():
     # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="dynamic_cylinders")
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="one_static")
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
     phase = "move_base"
     
-    # 1. Setup planners
-    global_planner = rrtstar.RRTStar()
+# 1. Setup planners
+    ########## Set variables for RRT_planners ################
+    X_dimensions = np.array([(-5,5),(-5,5)]) # change once we know the actual dim of the final workspace
+    # print(obstacles)
+    obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here   
+    # print(obstacles)
+    q = 8
+    r = 0.5
+    max_samples = 10024
+    rewire_count = 32
+    
+    prc = 0.1
+    
+    ########## Set class for RRT_planners ################
+    RRT_planner = global_planner_rrt.RRT_planner(X_dimensions,obstacles_rrt,q,r,max_samples,rewire_count)
+    
     local_planner = mpc.create_mpc_planner()
     logger.info("Global path: ")
     
-    # 2a. Navigation global plan
-    # global_path = global_planner.plan(BASE_START, BASE_GOAL, obstacles)
+    # 2a. Navigation global plan 
+    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=False)
+    logger.info(f"GLOBAL PATH IS: {global_path}")
     
+    action = np.zeros(env.n())
+
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
             # 2b. Navigation local replan (dynamic obs)
             # TODO: get control from local planner, fill action
             # TODO: once done, switch phase to move_arm
-            current_state = np.array([0.0, 0.0, 0.0])
-            goal_state = np.array([1.0, 1.0, 0.0])
+            current_state = np.array([4.0, 4.0, 0.0])
+            goal_state = np.array([-4.0, 1.0, 0.0])
             vehicle_control = local_planner.plan(current_state, goal_state, None)
             # print(vehicle_control)
-            # action[:2] = vehicle_control
+            action[:2] = vehicle_control
             # logger.info("in phase: move_base")
             # pass
 
@@ -65,7 +82,7 @@ def main():
 
 
         # Simulation step
-        action = np.zeros(env.n())
+        # action = np.zeros(env.n())
         #action[0] = 0.2 # drive forward
         ob, reward, terminated, truncated, info  = env.step(action)
         if terminated:
@@ -120,6 +137,18 @@ def create_env_with_obstacles(
 
     return env, robots, obs
     
+    
+def sphere_to_square(obstacles):
+    obs = obstacles['static']
+    print(obs)
+    sq_obs = []
+    for el in obs:
+        x_min = el['position'][0]-el['radius']
+        y_min = el['position'][1]-el['radius']
+        x_max = el['position'][0]+el['radius']
+        y_max = el['position'][1]+el['radius']
+        sq_obs.append((x_min,y_min,x_max,y_max))
+    return np.array(sq_obs)
     
 if __name__ == "__main__":
     main()
