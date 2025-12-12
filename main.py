@@ -9,7 +9,7 @@ from global_planners import rrtstar #,dumb_global_planner
 # from local_planners import dumb_local_planner
 from local_planners import mpc
 
-N_STEPS = 1000
+N_STEPS = 10000
 BASE_START = (0,0)
 BASE_GOAL = (5,5)
 # ARM_START =
@@ -20,6 +20,9 @@ logger.setLevel(logging.INFO)
 def main():
     # 0. Setup environment
     env, robots, obstacles = create_env_with_obstacles()
+    ob = env.reset(
+        pos=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
+    )[0]
     history = []
     phase = "move_base"
     
@@ -32,16 +35,19 @@ def main():
     # global_path = global_planner.plan(BASE_START, BASE_GOAL, obstacles)
     
     # Main loop
+    action = np.zeros(env.n())
     for step in range(N_STEPS):
         if phase == "move_base":
             # 2b. Navigation local replan (dynamic obs)
             # TODO: get control from local planner, fill action
             # TODO: once done, switch phase to move_arm
-            current_state = np.array([0.0, 0.0, 0.0])
-            goal_state = np.array([1.0, 1.0, 0.0])
+            # current_state = np.array([0.0, 0.0, 0.0])
+            current_state = ob["robot_0"]["joint_state"]["position"][:3]
+            goal_state = np.array([2.0, 2.0, 0.0])
             vehicle_control = local_planner.plan(current_state, goal_state, None)
-            print(vehicle_control)
-            # action[:2] = vehicle_control
+            logger.info(f"vehicle control: {vehicle_control}")
+            action[:2] = vehicle_control
+            # action[1] = -action[1]
             # logger.info("in phase: move_base")
             # pass
 
@@ -53,9 +59,11 @@ def main():
             pass
         
         # Simulation step
-        action = np.zeros(env.n())
-        action[0] = 0.2 # drive forward
+        # action = np.zeros(env.n())
+        # action[0] = 0.2 # drive forward
         ob, reward, terminated, truncated, info  = env.step(action)
+        logger.info(action[:2])
+        logger.info(f"robot pos: {ob['robot_0']['joint_state']['position'][:3]}")
         if terminated:
             logger.info(info)
             break
@@ -72,8 +80,8 @@ def create_env_with_obstacles(dynamic_obs=False, randomize=False):
             castor_wheels=["rotacastor_right_joint", "rotacastor_left_joint"],
             wheel_radius = 0.08,
             wheel_distance = 0.494,
-            spawn_rotation = 0,
-            facing_direction = '-y',
+            spawn_rotation = 1.570796,
+            facing_direction = 'x',
         ),
     ]
 
@@ -81,13 +89,14 @@ def create_env_with_obstacles(dynamic_obs=False, randomize=False):
         dt=0.01, robots=robots, render=True
     )
 
-    ob = env.reset(
-        pos=np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
-    )
+    # ob = env.reset(
+    #     pos=np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
+    # )
     
     #TODO: create wall and static obs
     from urdfenvs.scene_examples.obstacles import sphereObst1
-    obstacles = [sphereObst1]
+    # obstacles = [sphereObst1]
+    obstacles = []
     for obstacle in obstacles: 
         env.add_obstacle(obstacle)
     
