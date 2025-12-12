@@ -12,6 +12,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 ```
+2. [Acados (for mpc)](https://docs.acados.org/python_interface/index.html#installation)
 
 ## Quickstart
 Remember to activate the venv before running the following commands.
