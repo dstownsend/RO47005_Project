@@ -6,7 +6,6 @@ from urdfenvs.urdf_common.urdf_env import UrdfEnv
 from urdfenvs.scene_examples.goal import *
 
 
-
 import matplotlib
 matplotlib.use("TkAgg")   # Force an interactive backend
 import matplotlib.pyplot as plt
@@ -34,6 +33,38 @@ def getMotorJointStates(robot):
   joint_torques = [state[3] for state in joint_states]
 
   return joint_positions, joint_velocities, joint_torques, joint_names
+  
+  
+  
+### RRT Functions ###
+def getMotorJointLimits(robot):
+  joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
+  joint_names = [joint[1] for joint in joint_infos if joint[3] > -1]
+  joint_limits= [(joint[8],joint[9]) for joint in joint_infos if joint[3] > -1]
+
+  return joint_limits, joint_names
+
+# Gen sample 
+
+# Gen sample goal 
+
+# Check collisions   
+  
+# Find nearest node
+  
+class TreeNode(object):
+    def __init__(self, config, parent=None):
+        self.parent = parent
+        self.config = config
+  
+    def retrace(self):
+        sequence = []
+        node = self
+        while node is not None:
+            sequence.append(node.config)
+            node = node.parent
+        return sequence[::-1]
+
 
 ### Supporting Functions ###
 def plot_2D_path(path):
@@ -71,13 +102,7 @@ def update_sphere(robot_id, joint_index, sphere_id):
     # Move the sphere to follow the joint
     p.resetBasePositionAndOrientation(sphere_id, pos, orn)
 
-def draw_trajectory(points, color=[1,0,0], width=2, life_time=0):
-    """
-    points: list of [x, y, z] positions
-    color: RGB (0–1)
-    width: line thickness
-    life_time: 0 = permanent
-    """
+def draw_line(points, color=[1,0,0], width=2, life_time=0):
     for i in range(len(points)-1):
         p.addUserDebugLine(
             points[i],
@@ -86,6 +111,18 @@ def draw_trajectory(points, color=[1,0,0], width=2, life_time=0):
             lineWidth=width,
             lifeTime=life_time
         )
+
+def draw_waypoint(points, color=[0,0,1], pointSize=10):
+    p.addUserDebugPoints(
+        pointPositions=points,
+        pointColorsRGB=[color] * len(points),
+        pointSize=pointSize,
+        lifeTime=0
+    )
+
+
+        
+        
 
 
 ### Path Generation ###
@@ -110,16 +147,30 @@ def cubic_interpolate(q0, q1, n_steps):
     return result
     
     
+def plan_joint_path(way_points_cart, robot_id, ee_id, interp_steps):
+    ikSolver = 0
+    joint_poses = []
+    joint_path_segments = []
+    
+    for i in range(len(way_points_cart)):
 
-### Velocity Control ###
-def compute_joint_vel(q_current, q_desired, dt, max_vel=1.0):
-    """Convert joint angle error into joint velocity command."""
-    q_current = np.array(q_current)
-    q_desired = np.array(q_desired)
-    vel = (q_desired - q_current) / dt
-    # clip velocities to safe values
-    return np.clip(vel, -max_vel, max_vel)
+        joint_pose = p.calculateInverseKinematics(robot_id,
+                      ee_id,
+                      way_points_cart[i],
+                      solver=ikSolver)[:7]
+                      
+        joint_pose = np.array(joint_pose)
+        joint_poses.append(joint_pose)
 
+    for i in range(len(joint_poses)-1):
+        joint_path_segment = cubic_interpolate(joint_poses[i], joint_poses[i+1], interp_steps)
+        
+        joint_path_segment = np.array(joint_path_segment)
+        joint_path_segments.append(joint_path_segment)
+
+    joint_path = np.vstack(joint_path_segments)
+    
+    return joint_path
 
 
 
@@ -139,28 +190,35 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     env: UrdfEnv = UrdfEnv(
         dt=0.01, robots=robots, render=render
     )
-    
+    dt=0.01
     ob = env.reset(
         pos=np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
     )   
-    print(f"Initial observation : {ob}")
     
-    robot_id = env._robots[0]._robot  
+    robot_id = env._robots[0]._robot         
         
     action = np.zeros(env.n())
     
     for _ in range(100):
         ob, *_ = env.step(action)
     
+    joint_home_pose = [0.0, math.radians(-85), 0.0, math.radians(-160), 0.0, 1.8, 0.5]
     
+    for idx in range(len(joint_home_pose)):
+        p.resetJointState(robot_id, idx+7, joint_home_pose[idx]);
+    
+    
+    for _ in range(100):
+        ob, *_ = env.step(action)
+        
     #getJointStates A1 to A7 = 7 to 14   
     #action A1 to A7 = 2 to 9  
     joint_indices = range(7,15)
 
 
-    num_joints = 24
-    joint_num = 1
-    hand_id = 15
+
+
+
     
 ## Visualisations
     sphere_visual = p.createVisualShape(
@@ -180,16 +238,27 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
         info = p.getJointInfo(robot_id, j)
         print(j, info[1].decode("utf-8"), info[2])
     
-    ## Single joint action   
-    #action[joint_num + 1] = -0.5
+
     
     ## Linear trajectory  
-    ikSolver = 0    
-    q0_cart = list(p.getLinkState(robot_id,hand_id)[4])
     
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13   
     print(f"{mpos}\n")
     print(f"{names}\n")
+    
+    limits, _ = getMotorJointLimits(robot_id)
+    limits = limits[:7]
+    print(f"{limits}\n")
+    
+    
+    
+    ########
+    hand_id = 15
+    
+    
+    qh_cart = list(p.getLinkState(robot_id,hand_id)[4])
+       
+    q0_cart = list([-0.2, -0.4, 1.5])
     
     q1_cart = list(q0_cart)
     q1_cart[0] += 0.4
@@ -202,64 +271,6 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     
     q4_cart = q0_cart
     
-    jointPoses0 = p.calculateInverseKinematics(robot_id,
-                      hand_id,
-                      q0_cart,
-                      solver=ikSolver)
-
-    print(jointPoses0)     
-    jointPoses0 = jointPoses0[:7]
-    
-
-    #jointPoses0[0] += math.radians(45)
-                   
-    print(jointPoses0)     
-                      
-    jointPoses1 = p.calculateInverseKinematics(robot_id,
-                      hand_id,
-                      q1_cart,
-                      solver=ikSolver)[:7]
-    jointPoses2 = p.calculateInverseKinematics(robot_id,
-                      hand_id,
-                      q2_cart,
-                      solver=ikSolver)[:7]
-    jointPoses3 = p.calculateInverseKinematics(robot_id,
-                      hand_id,
-                      q3_cart,
-                      solver=ikSolver)[:7]
-    jointPoses4 = p.calculateInverseKinematics(robot_id,
-                      hand_id,
-                      q4_cart,
-                      solver=ikSolver)[:7]
-                      
-    jointPoses0 = np.asarray(jointPoses0)
-    jointPoses1 = np.asarray(jointPoses1)
-    jointPoses2 = np.asarray(jointPoses2)
-    jointPoses3= np.asarray(jointPoses3)
-    jointPoses4= np.asarray(jointPoses4)
-
-
-    #for idx in range(len(jointPoses1)):
-     #   p.resetJointState(robot_id, idx+7, jointPoses2[idx]);
-                  
-              
-    
-    
-    
-    traj_joint1 = cubic_interpolate(jointPoses0, jointPoses1, 500)
-    traj_joint2 = cubic_interpolate(jointPoses1, jointPoses2, 500)
-    traj_joint3 = cubic_interpolate(jointPoses2, jointPoses3, 500)
-    traj_joint4 = cubic_interpolate(jointPoses3, jointPoses4, 500)
-    
-    traj_joint1 = np.array(traj_joint1)
-    traj_joint2 = np.array(traj_joint2)
-    traj_joint3 = np.array(traj_joint3)
-    traj_joint4 = np.array(traj_joint4)
-    
-    traj_joint = np.vstack((traj_joint1,traj_joint2,traj_joint3,traj_joint4))
-
-    print(len(q2_cart))
-    
     way_points = []
     way_points.append(q0_cart)
     way_points.append(q1_cart)
@@ -267,99 +278,59 @@ def run_albert(n_steps=10000, render=False, goal=True, obstacles=True):
     way_points.append(q3_cart)
     way_points.append(q0_cart)
     
-    draw_trajectory(way_points)
+    interp_steps = 100
     
-    #plot_joint_state(traj_joint)
+    joint_path = plan_joint_path(way_points, robot_id, hand_id, interp_steps)
+    draw_line(way_points)
+    draw_waypoint(way_points)
     
-    
-    
-    
-
-    
-
-## Visualisation
-    start_pos = p.createVisualShape(
-        shapeType=p.GEOM_SPHERE,
-        radius=0.04,
-        rgbaColor=[0, 1, 0, 1]
-    )
-    start_pos_id = p.createMultiBody(
-        baseMass=0,
-        baseVisualShapeIndex=start_pos,
-        basePosition=q0_cart,
-        useMaximalCoordinates=False
-    )
-    
-    mid_pos = p.createVisualShape(
-        shapeType=p.GEOM_SPHERE,
-        radius=0.04,
-        rgbaColor=[0, 0, 1, 1]
-    )
-    mid_pos_id = p.createMultiBody(
-        baseMass=0,
-        baseVisualShapeIndex=mid_pos,
-        basePosition=q1_cart,
-        useMaximalCoordinates=False
-    )
-    
-    end_pos = p.createVisualShape(
-        shapeType=p.GEOM_SPHERE,
-        radius=0.04,
-        rgbaColor=[1, 0, 0, 1]
-    )
-    end_pos_id = p.createMultiBody(
-        baseMass=0,
-        baseVisualShapeIndex=end_pos,
-        basePosition=q2_cart,
-        useMaximalCoordinates=False
-    )
+    ########
     
     
-    joint_pose_data = []
     
+     
     history = []
     path2D = []
     trajectory = []
 
+    step_num = 0
+    Kp = 10.0
+
+    vel_lim = 2.0
+    
+    error_int = 0.0
+    error_prev = 0.0
     
     for i in range(n_steps):
+        action = np.zeros(env.n()) #11
+    
+    
+        mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
+        current_joint_pos = mpos[:7]
+        current_cart = list(p.getLinkState(robot_id,hand_id)[4])
+        
+        error_joint = joint_path[step_num] - current_joint_pos
+                
+        error_mag = np.linalg.norm(np.array(error_joint))
+        
+        if error_mag < math.radians(1):
+            step_num += 1
+        
+        error_int += (error_prev - error_joint) * dt
+        error_prev = error_joint
+        
+        cmd_vel = Kp * error_joint  
+        cmd_vel = np.clip(cmd_vel, -vel_lim, vel_lim)
+        
+        
+        action[2:9] = cmd_vel
+        
+        print(f"{i}, {step_num}, {math.degrees(error_mag)}, {cmd_vel}") 
+        
         ob, *_ = env.step(action)
         history.append(ob)
-
-        action = np.zeros(env.n()) #11
-        
-        if i < len(traj_joint):
-            K = 1
-            
-            mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
-
-            current_joint_pos = mpos[:7]
-            current_cart = list(p.getLinkState(robot_id,hand_id)[4])
-
-            error_joint = traj_joint[i] - current_joint_pos
-
-            
-            cmd_vel = K * error_joint          
-            cmd_vel = np.clip(cmd_vel, -1.0, 1.0)
-
-            #print(f"{names[0]}, {jointPoses0[0]}, {mpos[0]}, {error_joint[0]}")
-
-            trajectory.append(current_cart)
-
-            
-            action[2:9] = cmd_vel
-            
-
-           
-            
-           
-        
-        
-        
-        ## Update stage
         update_sphere(robot_id, hand_id, sphere_id)
             
-    #plot_2D_path(np.array(path2D))	
 
     	
     env.close()
