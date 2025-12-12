@@ -10,7 +10,7 @@ from global_planners import global_planner_rrt #,dumb_global_planner
 from local_planners import mpc
 
 from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obstacle_states
-from environment.scenarios import get_scenario, get_random_training_scenario
+from environment.scenarios import get_scenario
 
 N_STEPS = 10000
 BASE_START = (4,4)

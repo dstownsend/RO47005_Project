@@ -211,7 +211,16 @@ def build_room_walls(
     return walls
 
 
-def build_static_cylinder(name: str, position, radius=0.5, height=2.0, rgba=(0.1, 0.3, 0.3, 1.0)):
+def build_static_cylinder(
+    name: str,
+    position,
+    radius=0.5,
+    height=2.0,
+    rgba=(0.1, 0.3, 0.3, 1.0),
+    low: dict | None = None,
+    high: dict | None = None,
+    randomize: bool = False,
+):
     content_dict = {
         "type": "cylinder",
         "movable": False,
@@ -222,7 +231,25 @@ def build_static_cylinder(name: str, position, radius=0.5, height=2.0, rgba=(0.1
         },
         "rgba": list(rgba),
     }
-    return CylinderObstacle(name=name, content_dict=content_dict)
+    if low:
+        low = {
+            "position": low.get("position", list(position)),
+            "radius": low.get("radius", radius),
+            "height": low.get("height", height),
+        }
+        content_dict["low"] = low
+    if high:
+        high = {
+            "position": high.get("position", list(position)),
+            "radius": high.get("radius", radius),
+            "height": high.get("height", height),
+        }
+        content_dict["high"] = high
+
+    cyl = CylinderObstacle(name=name, content_dict=content_dict)
+    if randomize or low or high:
+        cyl.shuffle()
+    return cyl
 
 
 def build_moving_sphere(
@@ -307,14 +334,21 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
     for i, s_cfg in enumerate(scenario_cfg["static"]):
         cyl = build_static_cylinder(
             name=f"static_{i}",
-            position=s_cfg["position"],
+            position=s_cfg.get("position", [0.0, 0.0, 0.0]),
             radius=s_cfg.get("radius", 0.5),
+            height=s_cfg.get("height", 2.0),
+            rgba=s_cfg.get("rgba", (0.1, 0.3, 0.3, 1.0)),
+            low=s_cfg.get("low"),
+            high=s_cfg.get("high"),
+            randomize=s_cfg.get("randomize", False),
         )
         env.add_obstacle(cyl)
         obstacles_dict["static"].append(
             {
-                "position": list(s_cfg["position"]),
-                "radius": s_cfg.get("radius", 0.5),
+                "position": cyl.position().tolist(),
+                "radius": cyl.radius(),
+                "height": cyl.height(),
+                "rgba": list(cyl.rgba()),
             }
         )
 
