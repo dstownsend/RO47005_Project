@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 from scipy.linalg import block_diag
 
 from acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
@@ -14,6 +15,7 @@ OMEGA_MAX_RAD_S = 0.5
 Q_MAT = np.diag([1e3, 1e3, 1e-3])  # [x,y,theta]
 Q_MAT_E = np.diag([1e3, 1e3, 1e1])  # [x,y,theta]
 R_MAT = np.diag([1e1, 1e1])  # [v, theta_d]
+logger = logging.getLogger(__name__)
 
 
 class MPC(BaseLocalPlanner):
@@ -38,7 +40,8 @@ class MPC(BaseLocalPlanner):
             self.ocp_solver.set(j, "yref", self.yref)
         self.ocp_solver.set(self.ocp_solver.N, "yref", self.yref_e)
         
-        print("\t", self.ocp_solver.get_cost())
+        logger.debug("\t", self.ocp_solver.get_cost())
+        logger.debug(current_state)
         
         control = self.ocp_solver.solve_for_x0(current_state)
         return control
@@ -87,8 +90,8 @@ class MPC(BaseLocalPlanner):
         ocp.constraints.idxbu = np.array([0, 1]) # V applies to 0th control, omega to 1st control
 
         ocp.constraints.x0 = np.array([0.0, 0.0, 0.0]) # Just to initialize, will be set at each plan() call
-        ocp.constraints.lh = np.array([0.0]) #obs avoidance, must be >=0
-        ocp.constraints.uh = np.array([1e8])   # large to indicate no upper bound
+        # ocp.constraints.lh = np.array([0.0]) #obs avoidance, must be >=0
+        # ocp.constraints.uh = np.array([1e8])   # large to indicate no upper bound
 
         return ocp
     
@@ -130,14 +133,14 @@ def create_robot_model() -> AcadosModel:
     f_expl = vertcat(v * cos(theta), v * sin(theta), theta_d)
 
     # For obstacle avoidance
-    p = SX.sym("p", 3)  # [x_obs, y_obs, r_safe]
+    # p = SX.sym("p", 3)  # [x_obs, y_obs, r_safe]
     
     model = AcadosModel()
     model.f_expl_expr = f_expl
     model.x = state_vector
     model.u = control_vector
-    model.con_h_expr = ((x - p[0])**2 + (y - p[1])**2) - p[2]**2  # should be >= 0
-    model.p = p # set this in the ocp before each solve
+    # model.con_h_expr = ((x - p[0])**2 + (y - p[1])**2) - p[2]**2  # should be >= 0
+    # model.p = p # set this in the ocp before each solve
     model.name = model_name
 
     model.t_label = "$t$ [s]"
