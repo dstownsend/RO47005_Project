@@ -21,7 +21,7 @@ class ArmController():
         self.vel_lim = 2.0
         self.goal_reached = False
     
-    def compute_vel(self, robot_id):
+    def compute_vel_path(self, robot_id):
         action = np.zeros(11) #11
     
         if self.step_num == len(self.path):
@@ -46,5 +46,19 @@ class ArmController():
 
         return action
 		
+    def compute_vel_single(self, robot_id, desired_joint_pos):
+        action = np.zeros(11) #11
+        
+        mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
+        current_joint_pos = mpos[:7]
+        current_cart = list(p.getLinkState(robot_id,self.ee_id)[4])
 
+        error_joint = np.asarray(desired_joint_pos) - np.asarray(current_joint_pos)
+
+        cmd_vel = self.Kp * error_joint  
+        cmd_vel = np.clip(cmd_vel, -self.vel_lim, self.vel_lim)
+        
+        action[2:9] = cmd_vel
+
+        return action
 		

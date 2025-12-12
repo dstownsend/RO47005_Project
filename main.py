@@ -8,6 +8,7 @@ from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
 from global_planners import global_planner_rrt, arm_cubic #,dumb_global_planner
 from controllers.arm_controller import ArmController
+from global_planners.arm_helpers import getMotorJointStates
 
 import math
 import pybullet as p
@@ -65,15 +66,19 @@ def main():
     arm_global_planner = arm_cubic.ArmCubicPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
-
+    
     for _ in range(100):
         ob, *_ = env.step(np.zeros(11))
     joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
 
     for idx in range(len(joint_home_pose)):
         p.resetJointState(robot_id, idx+7, joint_home_pose[idx]);
+        
     for _ in range(100):
         ob, *_ = env.step(np.zeros(11))
+        
+    mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
+    desired_arm_joint_pos = mpos[:7]
 
     # Main loop
     for step in range(N_STEPS):
@@ -93,6 +98,9 @@ def main():
                 goal_state = np.append(next_vertex, 0.0)
             vehicle_control = local_planner.plan(current_state, goal_state, obstacles)
             logger.debug(f"vehicle control: {vehicle_control}")
+            
+            action = arm_controller.compute_vel_single(robot_id, desired_arm_joint_pos)
+            
             action[:2] = vehicle_control
 
             # print(vehicle_control)
@@ -108,7 +116,7 @@ def main():
                 if arm_controller.path is None:
                     arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
                 
-                action = arm_controller.compute_vel(robot_id)
+                action = arm_controller.compute_vel_path(robot_id)
             else:
                action = np.zeros(env.n()) 
 
