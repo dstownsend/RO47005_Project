@@ -30,8 +30,6 @@ def main():
     phase = "move_base"
     
     # 1. Setup planners
-    global_planner = rrtstar.RRTStar()
-
     ########## Set variables for RRT_planners ################
     X_dimensions = np.array([(0,100),(0,100)]) # change once we know the actual dim of the final workspace
     obstacles = obstacles # Possibly change type or dim here   
@@ -49,7 +47,7 @@ def main():
     logger.info("Global path: ")
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.Plan(rrt_type = 'basic_rrt', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc)
+    global_path = RRT_planner.plan(rrt_type = 'basic_rrt', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc)
     
     # Main loop
     for step in range(N_STEPS):

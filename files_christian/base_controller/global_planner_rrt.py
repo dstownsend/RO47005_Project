@@ -74,7 +74,7 @@ class RRT_planner:
 
 
 
-    def Plan(self, rrt_type, x_init, x_goal, prc, plot_bool=False):
+    def plan(self, rrt_type, x_init, x_goal, prc, plot_bool=False):
         """
         Plan from start to goal and choose which global RRT-based planner to execute.
 
