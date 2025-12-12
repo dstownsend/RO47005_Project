@@ -9,6 +9,9 @@ from global_planners import rrtstar #,dumb_global_planner
 # from local_planners import dumb_local_planner
 from local_planners import mpc
 
+from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obstacle_states
+from environment.scenarios import get_scenario, get_random_training_scenario
+
 N_STEPS = 1000
 BASE_START = (0,0)
 BASE_GOAL = (5,5)
@@ -19,7 +22,8 @@ logger.setLevel(logging.INFO)
 
 def main():
     # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles()
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="dynamic_cylinders")
+    # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
     phase = "move_base"
     
@@ -40,7 +44,7 @@ def main():
             current_state = np.array([0.0, 0.0, 0.0])
             goal_state = np.array([1.0, 1.0, 0.0])
             vehicle_control = local_planner.plan(current_state, goal_state, None)
-            print(vehicle_control)
+            # print(vehicle_control)
             # action[:2] = vehicle_control
             # logger.info("in phase: move_base")
             # pass
@@ -52,18 +56,28 @@ def main():
             # action[2:9] = joint_velocities
             pass
         
+        # Sync dynamic obstacle state for planners
+        obstacles = refresh_dynamic_obstacle_states(env, obstacles)
+
+        if obstacles["dynamic"]:
+            dyn_pos = obstacles["dynamic"][0].get("position")
+            # print(f"Dynamic obstacle 0 position @t={env.t():.2f}: {dyn_pos}")
+
+
         # Simulation step
         action = np.zeros(env.n())
-        action[0] = 0.2 # drive forward
+        #action[0] = 0.2 # drive forward
         ob, reward, terminated, truncated, info  = env.step(action)
         if terminated:
             logger.info(info)
             break
         history.append(ob)
-        
     env.close()
 
-def create_env_with_obstacles(dynamic_obs=False, randomize=False):
+def create_env_with_obstacles(
+        randomize=False,
+        scenario_name: str = "empty"):
+
     robots = [
         GenericDiffDriveRobot(
             urdf="albert.urdf",
@@ -81,25 +95,30 @@ def create_env_with_obstacles(dynamic_obs=False, randomize=False):
         dt=0.01, robots=robots, render=True
     )
 
-    ob = env.reset(
-        pos=np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
-    )
-    
+    # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
+    pos = np.array([4.0, 4.0, 0.0,
+                    0.0, 0.7, 0.0, -1.0, 0.0, 1.0, 0.0,
+                    0.02, 0.02], dtype=float)
+    ob = env.reset(pos=pos)
+        
     #TODO: create wall and static obs
-    from urdfenvs.scene_examples.obstacles import sphereObst1
-    obstacles = [sphereObst1]
-    for obstacle in obstacles: 
-        env.add_obstacle(obstacle)
-    
-    if dynamic_obs:
-        #TODO: create dynamic obs
-        pass
-    
+
+    # Get Scenario Config
+    scenario_cfg = {}
     if randomize:
-        # TODO: some logic to give random env 
-        pass
+        _, scenario_cfg = get_random_training_scenario()
+    else:
+        scenario_cfg = get_scenario(scenario_name)
     
-    return env, robots, obstacles
+    # Spawn in walls and obstacles returns obstacle dictionary (walls, static, dynamic)
+    obs = apply_scenario_to_env(env, scenario_cfg)
+
+    # Camera perspectives
+    env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
+    # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
+    # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
+
+    return env, robots, obs
     
     
 if __name__ == "__main__":
