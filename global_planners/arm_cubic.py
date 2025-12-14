@@ -58,7 +58,9 @@ class ArmCubicPlanner(BaseGlobalPlanner):
     def plan(self, robot_id, goal, visualise=False):
     
         current_pose_cart = list(p.getLinkState(robot_id, self.ee_id)[4])
-        p1_cart = list(current_pose_cart)
+        print(current_pose_cart)
+        
+        p1_cart = [-4, -1, 0.5]
         p1_cart[2] += 0.2
         
         p2_cart = list(p1_cart)

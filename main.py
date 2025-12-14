@@ -19,7 +19,7 @@ from local_planners import mpc
 from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obstacle_states
 from environment.scenarios import get_scenario
 
-N_STEPS = 10000
+N_STEPS = 100000
 BASE_START = (4,4)
 BASE_GOAL = (-4,-1)
 # ARM_START =
@@ -80,6 +80,7 @@ def main():
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
 
+
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
@@ -100,9 +101,8 @@ def main():
             logger.debug(f"vehicle control: {vehicle_control}")
             
             action = arm_controller.compute_vel_single(robot_id, desired_arm_joint_pos)
-            
             action[:2] = vehicle_control
-
+            
             # print(vehicle_control)
             # logger.info("in phase: move_base")
             # pass
@@ -117,10 +117,13 @@ def main():
                     arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
                 
                 action = arm_controller.compute_vel_path(robot_id)
+                
             else:
                action = np.zeros(env.n()) 
 
-            
+        # Fix gripper finger joint to avoid API bug
+        p.resetJointState(robot_id, 16, 0.01);
+        p.resetJointState(robot_id, 17, 0.01);     
         
         # Sync dynamic obstacle state for planners
         obstacles = refresh_dynamic_obstacle_states(env, obstacles)
