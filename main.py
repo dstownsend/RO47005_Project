@@ -39,9 +39,12 @@ def main():
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
-    X_dimensions = np.array([(-4.5,4.5),(-4.5,4.5)]) # change once we know the actual dim of the final workspace
+    #X_dimensions = np.array([(-4.5,4.5),(-4.5,4.5)]) # change once we know the actual dim of the final workspace
+    X_dimensions = np.array([(-5,10),(-5,10)]) # change once we know the actual dim of the final workspace
     # print(obstacles)
-    obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here   
+        
+    obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here
+    obstacles_rrt = dilate_obstacles(obstacles_rrt,0.23365)  # 0.3365 m  is max halfwidth of albert base, check if all distances in env are in m
     # print(obstacles)
     q = 0.1
     r = 0.01
@@ -56,7 +59,7 @@ def main():
     local_planner = mpc.create_mpc_planner()
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.plan(rrt_type = 'rrt_star', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
     logger.info(f"GLOBAL PATH IS: {global_path}")
     
     action = np.zeros(env.n())
@@ -200,5 +203,26 @@ def sphere_to_square(obstacles):
         sq_obs.append((x_min,y_min,x_max,y_max))
     return np.array(sq_obs) if len(sq_obs)>0 else None
     
+
+
+def dilate_obstacles(obstacles, dilation):
+    def add_dilation(tupl, dilation):
+        return (tupl[0] - dilation, tupl[1] - dilation, tupl[2] + dilation, tupl[3] + dilation)
+    
+    wall_obstacles = np.array([
+        (-5.05, -5.0, -4.95, 10.0),   
+        (9.95, -5.0, 10.05, 10.0),   
+        (-5.0, -5.05, 10.0, -4.95),   
+        (-5.0, 9.95, 10.0, 10.05),    
+    ])
+    
+    hub_wall_obstacles = np.array([
+        (-3.01, -5.0, -2.99, -2),
+        (-4, -3.00, -3.01, -1.99),
+    ])
+    all_obstacles = np.concatenate((obstacles, wall_obstacles, hub_wall_obstacles), axis=0)
+    dilated_obstacles = [add_dilation(el, dilation) for el in all_obstacles]
+    return np.array(dilated_obstacles)
+
 if __name__ == "__main__":
     main()
