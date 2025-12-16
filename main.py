@@ -30,12 +30,10 @@ logger.setLevel(logging.INFO)
 def main():
     # 0. Setup environment
     env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static
-    ob = env.reset(
-        pos=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
-    )[0]
+    ob, *_ = env.step(np.zeros(11))
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
-    phase = "move_base"
+    phase = "move_arm"
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
@@ -59,26 +57,17 @@ def main():
     local_planner = mpc.create_mpc_planner()
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
-    logger.info(f"GLOBAL PATH IS: {global_path}")
+    #global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    #logger.info(f"GLOBAL PATH IS: {global_path}")
     
     action = np.zeros(env.n())
-    next_vertex = global_path.pop(0)
-    goal_state = np.append(next_vertex, 0.0)
+    #next_vertex = global_path.pop(0)
+    #goal_state = np.append(next_vertex, 0.0)
     
     arm_global_planner = arm_cubic.ArmCubicPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
     
-    for _ in range(100):
-        ob, *_ = env.step(np.zeros(11))
-    joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
-
-    for idx in range(len(joint_home_pose)):
-        p.resetJointState(robot_id, idx+7, joint_home_pose[idx])
-        
-    for _ in range(100):
-        ob, *_ = env.step(np.zeros(11))
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
@@ -120,7 +109,7 @@ def main():
                     arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
                 
                 action = arm_controller.compute_vel_path(robot_id)
-                
+                #action = np.zeros(env.n()) 
             else:
                action = np.zeros(env.n()) 
 
@@ -168,8 +157,8 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([4.0, 4.0, 0.0,
-                    0.0, 0.7, 0.0, -1.0, 0.0, 1.0, 0.0,
+    pos = np.array([-4.0, -1.0, math.radians(-90),
+                    0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50),
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
         

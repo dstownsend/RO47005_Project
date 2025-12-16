@@ -56,30 +56,32 @@ class ArmCubicPlanner(BaseGlobalPlanner):
     
     
     def plan(self, robot_id, goal, visualise=False):
-    
+
+        pickup_cart = [-3.7000500679016115, -1.6294126749038695, 0.5583768248558044]
+        dropoff_cart = [-4.300050067901611, -1.6294126749038695, 0.5583768248558044]
+
         current_pose_cart = list(p.getLinkState(robot_id, self.ee_id)[4])
-        print(current_pose_cart)
         
-        p1_cart = [-4, -1, 0.5]
-        p1_cart[2] += 0.2
+        p1_cart = list(current_pose_cart)
+        p1_cart[1] -= 0.4   
+        p1_cart[2] += 0.1   
         
         p2_cart = list(p1_cart)
-        p2_cart[1] -= 0.2
-        p2_cart[0] += 0.2
-        
-        p3_cart = list(p2_cart)
-        p3_cart[2] -= 0.2
+        p2_cart[0] += 0.3   
 
+        p3_cart = list(pickup_cart)
+       
         p4_cart = list(p3_cart)
-        p4_cart[2] += 0.2      
+        p4_cart[2] += 0.5  
         
         p5_cart = list(p4_cart)
-        p5_cart[0] -= 0.5      
-        
-        p6_cart = list(p5_cart)
-        p6_cart[2] -= 0.2   
+        p5_cart[0] -= 0.6
 
+        p6_cart = list(dropoff_cart)
         
+        p7_cart = list(p6_cart)
+        p7_cart[2] += 0.5
+                
         waypoints = []
         waypoints.append(current_pose_cart)
         waypoints.append(p1_cart)        
@@ -88,6 +90,7 @@ class ArmCubicPlanner(BaseGlobalPlanner):
         waypoints.append(p4_cart)
         waypoints.append(p5_cart)
         waypoints.append(p6_cart)
+        waypoints.append(p7_cart)
         
         if visualise:
             draw_line(waypoints)

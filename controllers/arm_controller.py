@@ -36,7 +36,7 @@ class ArmController():
 
         error_mag = np.linalg.norm(np.array(error_joint))
 
-        if error_mag < math.radians(1):
+        if error_mag < math.radians(0.5):
             self.step_num += 1
 
         cmd_vel = self.Kp * error_joint  
