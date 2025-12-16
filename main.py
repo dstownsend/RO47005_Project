@@ -6,7 +6,7 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import global_planner_rrt, arm_cubic #,dumb_global_planner
+from global_planners import global_planner_rrt, arm_cubic, arm_rrt #,dumb_global_planner
 from controllers.arm_controller import ArmController
 from global_planners.arm_helpers import getMotorJointStates
 
@@ -65,9 +65,10 @@ def main():
     #goal_state = np.append(next_vertex, 0.0)
     
     arm_global_planner = arm_cubic.ArmCubicPlanner()
+    arm_global_planner_rrt = arm_rrt.ArmRRTPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
-    
+    MANUAL_PATH = False
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
@@ -101,15 +102,18 @@ def main():
 
         elif phase == "move_arm":
             action[:2] = np.array([0.0,0.0])
-            logger.info("in phase: move_arm")
+            #logger.info("in phase: move_arm")
     
             # 3. Manipulation task
             if not arm_controller.goal_reached:
                 if arm_controller.path is None:
-                    arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                    if MANUAL_PATH:
+                        arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                    else:
+                        arm_controller.path = arm_global_planner_rrt.plan(robot_id, visualise=True)
                 
                 action = arm_controller.compute_vel_path(robot_id)
-                #action = np.zeros(env.n()) 
+                action = np.zeros(env.n()) 
             else:
                action = np.zeros(env.n()) 
 
