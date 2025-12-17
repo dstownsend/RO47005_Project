@@ -68,11 +68,13 @@ def main():
     arm_global_planner_rrt = arm_rrt.ArmRRTPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
-    MANUAL_PATH = False
+    MANUAL_PATH = False   
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
-
+    
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
 
     # Main loop
     for step in range(N_STEPS):
@@ -113,10 +115,11 @@ def main():
                         arm_controller.path = arm_global_planner_rrt.plan(robot_id, visualise=True)
                 
                 action = arm_controller.compute_vel_path(robot_id)
-                action = np.zeros(env.n()) 
+                #action = np.zeros(env.n()) 
             else:
                action = np.zeros(env.n()) 
-
+               
+        
         # Fix gripper finger joint to avoid API bug
         p.resetJointState(robot_id, 16, 0.01);
         p.resetJointState(robot_id, 17, 0.01);     
@@ -137,6 +140,7 @@ def main():
             logger.info(info)
             break
         history.append(ob)
+        
     env.close()
 
 def create_env_with_obstacles(
@@ -176,14 +180,13 @@ def create_env_with_obstacles(
     obs = apply_scenario_to_env(env, scenario_cfg)
 
     # Camera perspectives
-    env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
+    #env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
     # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
     # env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
-    # env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
+    env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
     # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
 
     return env, robots, obs
-    
     
 def sphere_to_square(obstacles):
     obs = obstacles['static']

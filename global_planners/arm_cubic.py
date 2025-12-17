@@ -28,6 +28,19 @@ class ArmCubicPlanner(BaseGlobalPlanner):
             result.append(qi)
 
         return result
+        
+    def quintic_interpolate(self, q0, q1, n_steps):
+        q0 = np.asarray(q0, dtype=float)
+        q1 = np.asarray(q1, dtype=float)
+
+        result = []
+        for i in range(n_steps):
+            t = i / (n_steps - 1)
+            h = 6*t**5 - 15*t**4 + 10*t**3  # quintic smoothstep
+            qi = (1 - h) * q0 + h * q1
+            result.append(qi)
+
+        return result
 
     def plan_joint_path(self, waypoints_cart, robot_id):
         ikSolver = 0
@@ -45,7 +58,7 @@ class ArmCubicPlanner(BaseGlobalPlanner):
             joint_poses.append(joint_pose)
 
         for i in range(len(joint_poses)-1):
-            joint_path_segment = self.cubic_interpolate(joint_poses[i], joint_poses[i+1], self.interp_steps)
+            joint_path_segment = self.quintic_interpolate(joint_poses[i], joint_poses[i+1], self.interp_steps)
             
             joint_path_segment = np.array(joint_path_segment)
             joint_path_segments.append(joint_path_segment)

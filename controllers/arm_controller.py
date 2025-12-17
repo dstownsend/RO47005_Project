@@ -17,7 +17,7 @@ class ArmController():
         self.interp_steps = 50
         self.path = None
         self.step_num = 0
-        self.Kp = 100.0
+        self.Kp = 10.0
         self.vel_lim = 2.0
         self.goal_reached = False
     
