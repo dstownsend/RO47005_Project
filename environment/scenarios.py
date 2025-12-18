@@ -12,7 +12,7 @@ SCENARIOS = {
     },
     "one_static": {
         "static": [
-            {"position": [0.0, 0.0, 0.0], "radius": 1.5},
+            {"position": [0.0, 0.0, 0.0], "radius": 1.2},
         ],
         "dynamic": [],
     },

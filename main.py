@@ -1,3 +1,4 @@
+from threading import local
 import numpy as np
 import logging
 import time
@@ -18,9 +19,10 @@ from local_planners import mpc
 
 from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obstacle_states
 from environment.scenarios import get_scenario
+from utils.visualization import draw_points_and_path, PathUpdater
 
 N_STEPS = 100000
-BASE_START = (4,4)
+BASE_START = (3,3)
 BASE_GOAL = (-4,-1)
 # ARM_START =
 # ARM_GOAL =
@@ -29,13 +31,21 @@ logger.setLevel(logging.INFO)
 
 def main():
     # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static
-    ob = env.reset(
-        pos=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
-    )[0]
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="one_static") #empty, one_static, dynamic_and_static
+    # ob = env.reset(
+    #     pos=np.array([0.0, 0.0, 3.14159, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
+    # )[0]
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
     phase = "move_base"
+    
+    # for j in range(2,11):
+    #     p.changeDynamics(
+    #         0,
+    #         j,
+    #         linearDamping=100,
+    #         angularDamping=100
+    #     )
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
@@ -43,8 +53,8 @@ def main():
     X_dimensions = np.array([(-5,10),(-5,10)]) # change once we know the actual dim of the final workspace
     # print(obstacles)
         
-    obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here
-    obstacles_rrt = dilate_obstacles(obstacles_rrt,0.23365)  # 0.3365 m  is max halfwidth of albert base, check if all distances in env are in m
+    # obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here
+    # obstacles_rrt = dilate_obstacles(obstacles_rrt,0.23365)  # 0.3365 m  is max halfwidth of albert base, check if all distances in env are in m
     # print(obstacles)
     q = 0.1
     r = 0.01
@@ -54,14 +64,18 @@ def main():
     prc = 0.1
     
     ########## Set class for RRT_planners ################
-    RRT_planner = global_planner_rrt.RRT_planner(X_dimensions,obstacles_rrt,q,r,max_samples,rewire_count)
+    # RRT_planner = global_planner_rrt.RRT_planner(X_dimensions,obstacles_rrt,q,r,max_samples,rewire_count)
     
     local_planner = mpc.create_mpc_planner()
+    drawer = PathUpdater()
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    # global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    global_path = [BASE_START, (2,2), BASE_GOAL] # for testing
     logger.info(f"GLOBAL PATH IS: {global_path}")
-    
+
+    draw_points_and_path(global_path, lifetime=0)
+
     action = np.zeros(env.n())
     next_vertex = global_path.pop(0)
     goal_state = np.append(next_vertex, 0.0)
@@ -83,7 +97,7 @@ def main():
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
 
-
+    last_vel = 0 
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
@@ -92,7 +106,7 @@ def main():
             current_state = ob["robot_0"]["joint_state"]["position"][:3]
             # goal_state = np.array([-4.0, 1.0, 0.0])
             cost = local_planner.ocp_solver.get_cost()
-            if cost < 10:
+            if cost < 20:
                 logger.warning(f"REACHED WAYPOINT {goal_state}")
                 if not global_path:
                     logger.warning("REACHED FINAL GOAL")
@@ -100,11 +114,18 @@ def main():
                     continue
                 next_vertex = global_path.pop(0)
                 goal_state = np.append(next_vertex, 0.0)
+                local_planner.flag_first_solve = True # reset warm start for new goal
             vehicle_control = local_planner.plan(current_state, goal_state, obstacles)
-            logger.debug(f"vehicle control: {vehicle_control}")
+            smooth_vel = np.clip(vehicle_control[0], last_vel - 0.02, last_vel + 0.02)
+            mpc_traj = local_planner.get_trajectory()
+            if step % 10 == 0:
+                drawer.draw_path(mpc_traj)
+            logger.info(f"vehicle control: {vehicle_control}")
             
             action = arm_controller.compute_vel_single(robot_id, desired_arm_joint_pos)
             action[:2] = vehicle_control
+            action[0] = smooth_vel
+            last_vel = smooth_vel
             
             # print(vehicle_control)
             # logger.info("in phase: move_base")
@@ -168,7 +189,7 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([4.0, 4.0, 0.0,
+    pos = np.array([3.0, 3.0, math.radians(180.0),
                     0.0, 0.7, 0.0, -1.0, 0.0, 1.0, 0.0,
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
