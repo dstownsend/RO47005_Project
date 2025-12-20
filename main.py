@@ -68,14 +68,15 @@ def main():
     arm_global_planner_rrt = arm_rrt.ArmRRTPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
-    MANUAL_PATH = False   
+    MANUAL_PATH = False           
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
-    
+           
+        
     for _ in range(100):
         ob, *_ = env.step(np.zeros(11))
-
+        
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
@@ -140,7 +141,7 @@ def main():
             logger.info(info)
             break
         history.append(ob)
-        
+
     env.close()
 
 def create_env_with_obstacles(
@@ -165,11 +166,11 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([-4.0, -1.0, math.radians(-90),
-                    0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50),
+    pos = np.array([-4.0, -1.0, math.radians(0),
+                    0.0, math.radians(0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50),
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
-        
+        		
     #TODO: create wall and static obs
 
     # Get Scenario Config
