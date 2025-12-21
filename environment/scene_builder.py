@@ -194,9 +194,9 @@ def build_room_walls(
             content_dict={
                 "type": "box",
                 "geometry": {
-                "position": [-4, -3, 1 ],
+                "position": [-4, -3, 0.25 ],
                     "width": 3,
-                    "height": 2,
+                    "height": 0.5,
                     "length": 0.1,
                 },
                 "low": {"position": [4.0, -3.5, 1.0]},

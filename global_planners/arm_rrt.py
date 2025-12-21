@@ -106,7 +106,7 @@ class ArmRRTPlanner(BaseGlobalPlanner):
                     p.resetJointState(self.robot_id, idx, home_config[idx])
                 continue
 
-            nearest_node = self.getNearestNode(sample_config)
+            nearest_node = self.get_nearest_node(sample_config)
             
             new_config = self.steer(nearest_node.config, sample_config)
             new_config = self.clamp_config(new_config)
@@ -185,7 +185,7 @@ class ArmRRTPlanner(BaseGlobalPlanner):
     
     ###############
     
-    def getNearestNode(self, q):
+    def get_nearest_node(self, q):
         return min(self.tree, key=lambda node: self.distance(node.config, q))
 
     def distance(self, q1, q2):
