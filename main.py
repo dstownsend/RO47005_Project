@@ -68,12 +68,31 @@ def main():
     arm_global_planner_rrt = arm_rrt.ArmRRTPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
-    MANUAL_PATH = False           
+    MANUAL_PATH = False  
+       
+    link_transformation = np.identity(4)
+    link_transformation[0:3, 3] = np.array([0.0, -0.0, 0.25])
+    env.add_collision_link(
+        robot_index=0,
+        link_index=0,
+        shape_type="sphere",
+        size=[0.45],
+        link_transformation=link_transformation,
+    )
+    
+    link_transformation = np.identity(4)
+    env.add_collision_link(
+        robot_index=0,
+        link_index=15,
+        shape_type="sphere",
+        size=[0.1],
+        link_transformation=link_transformation,
+    )
+          
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
-           
-        
+
     for _ in range(100):
         ob, *_ = env.step(np.zeros(11))
         
@@ -120,6 +139,8 @@ def main():
             else:
                action = np.zeros(env.n()) 
                
+        collision_links_position: dict = env.collision_links_poses(position_only=True)
+
         
         # Fix gripper finger joint to avoid API bug
         p.resetJointState(robot_id, 16, 0.01);
@@ -166,7 +187,7 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([-4.0, -1.0, math.radians(0),
+    pos = np.array([-4.0, -1.0, math.radians(-91),
                     0.0, math.radians(0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50),
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
