@@ -27,6 +27,13 @@ def getMotorJointStates(robot_id):
     return joint_positions, joint_velocities, joint_torques, joint_names
     
     
+def getMotorJointLimits(robot):
+    joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
+    joint_names = [joint[1] for joint in joint_infos if joint[3] > -1]
+    joint_limits= [(joint[8],joint[9]) for joint in joint_infos if joint[3] > -1]
+
+    return joint_limits, joint_names
+    
 ## Visualisation
 def draw_line(points, color=[1,0,0], width=2, life_time=0):
     for i in range(len(points)-1):
@@ -46,4 +53,9 @@ def draw_waypoint(points, color=[0,0,1], pointSize=10):
         pointSize=pointSize,
         lifeTime=0
     )
+    
+    
+    
+    
+    
     

@@ -6,7 +6,7 @@ import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
 from urdfenvs.urdf_common.urdf_env import UrdfEnv
 
-from global_planners import global_planner_rrt, arm_cubic #,dumb_global_planner
+from global_planners import global_planner_rrt, arm_cubic, arm_rrt #,dumb_global_planner
 from controllers.arm_controller import ArmController
 from global_planners.arm_helpers import getMotorJointStates
 
@@ -30,12 +30,10 @@ logger.setLevel(logging.INFO)
 def main():
     # 0. Setup environment
     env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static
-    ob = env.reset(
-        pos=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
-    )[0]
+    ob, *_ = env.step(np.zeros(11))
     # env, robots, obstacles = create_env_with_obstacles(scenario_name="empty")
     history = []
-    phase = "move_base"
+    phase = "move_arm"
     
 # 1. Setup planners
     ########## Set variables for RRT_planners ################
@@ -59,31 +57,45 @@ def main():
     local_planner = mpc.create_mpc_planner()
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
-    logger.info(f"GLOBAL PATH IS: {global_path}")
+    #global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    #logger.info(f"GLOBAL PATH IS: {global_path}")
     
     action = np.zeros(env.n())
-    next_vertex = global_path.pop(0)
-    goal_state = np.append(next_vertex, 0.0)
+    #next_vertex = global_path.pop(0)
+    #goal_state = np.append(next_vertex, 0.0)
     
     arm_global_planner = arm_cubic.ArmCubicPlanner()
+    arm_global_planner_rrt = arm_rrt.ArmRRTPlanner()
     arm_controller = ArmController()
     robot_id = env._robots[0]._robot 
+    MANUAL_PATH = False  
+       
+    link_transformation = np.identity(4)
+    link_transformation[0:3, 3] = np.array([0.0, -0.0, 0.25])
+    env.add_collision_link(
+        robot_index=0,
+        link_index=0,
+        shape_type="sphere",
+        size=[0.45],
+        link_transformation=link_transformation,
+    )
     
-    for _ in range(100):
-        ob, *_ = env.step(np.zeros(11))
-    joint_home_pose = [0.0, math.radians(-0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50)]
-
-    for idx in range(len(joint_home_pose)):
-        p.resetJointState(robot_id, idx+7, joint_home_pose[idx])
-        
-    for _ in range(100):
-        ob, *_ = env.step(np.zeros(11))
+    link_transformation = np.identity(4)
+    env.add_collision_link(
+        robot_index=0,
+        link_index=15,
+        shape_type="sphere",
+        size=[0.1],
+        link_transformation=link_transformation,
+    )
+          
         
     mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  
     desired_arm_joint_pos = mpos[:7]
 
-
+    for _ in range(100):
+        ob, *_ = env.step(np.zeros(11))
+        
     # Main loop
     for step in range(N_STEPS):
         if phase == "move_base":
@@ -112,18 +124,24 @@ def main():
 
         elif phase == "move_arm":
             action[:2] = np.array([0.0,0.0])
-            logger.info("in phase: move_arm")
+            #logger.info("in phase: move_arm")
     
             # 3. Manipulation task
             if not arm_controller.goal_reached:
                 if arm_controller.path is None:
-                    arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                    if MANUAL_PATH:
+                        arm_controller.path = arm_global_planner.plan(robot_id, None, visualise=True) 
+                    else:
+                        arm_controller.path = arm_global_planner_rrt.plan(robot_id, visualise=True)
                 
                 action = arm_controller.compute_vel_path(robot_id)
-                
+                #action = np.zeros(env.n()) 
             else:
                action = np.zeros(env.n()) 
+               
+        collision_links_position: dict = env.collision_links_poses(position_only=True)
 
+        
         # Fix gripper finger joint to avoid API bug
         p.resetJointState(robot_id, 16, 0.01);
         p.resetJointState(robot_id, 17, 0.01);     
@@ -144,6 +162,7 @@ def main():
             logger.info(info)
             break
         history.append(ob)
+
     env.close()
 
 def create_env_with_obstacles(
@@ -168,11 +187,11 @@ def create_env_with_obstacles(
     )
 
     # [x, y, yaw, j1, j2, j3, j4, j5, j6, j7, finger1, finger2]
-    pos = np.array([4.0, 4.0, 0.0,
-                    0.0, 0.7, 0.0, -1.0, 0.0, 1.0, 0.0,
+    pos = np.array([-4.0, -1.0, math.radians(-91),
+                    0.0, math.radians(0), 0.0, math.radians(-160), 0.0, math.radians(160), math.radians(50),
                     0.02, 0.02], dtype=float)
     ob = env.reset(pos=pos)
-        
+        		
     #TODO: create wall and static obs
 
     # Get Scenario Config
@@ -183,14 +202,13 @@ def create_env_with_obstacles(
     obs = apply_scenario_to_env(env, scenario_cfg)
 
     # Camera perspectives
-    env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
+    #env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
     # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
     # env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
-    # env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
+    env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
     # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
 
     return env, robots, obs
-    
     
 def sphere_to_square(obstacles):
     obs = obstacles['static']

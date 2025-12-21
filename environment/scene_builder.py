@@ -176,9 +176,9 @@ def build_room_walls(
             content_dict={
                 "type": "box",
                 "geometry": {
-                    "position": [-3.0, -3.5, 1],
+                    "position": [-3.0, -3.5, 0.25],
                     "width": 3,
-                    "height": 2,
+                    "height": 0.5,
                     "length": 0.1,
                 },
                 "low": {"position": [4.0, -3.5, 1.0]},
@@ -187,6 +187,25 @@ def build_room_walls(
             },
         )
     )
+    
+    walls.append(
+        BoxObstacle(
+            name=f"hub_middle_wall_+x",
+            content_dict={
+                "type": "box",
+                "geometry": {
+                "position": [-4, -3, 0.25 ],
+                    "width": 3,
+                    "height": 0.5,
+                    "length": 0.1,
+                },
+                "low": {"position": [4.0, -3.5, 1.0]},
+                "high": {"position": [4.0, -3.5, 1.0]},
+                "rgba": list(wall_rgba),
+            },
+        )
+    )
+    
 
     # +y hub wall obstacle for arm RRT planner
     walls.append(
@@ -196,9 +215,9 @@ def build_room_walls(
                 "type": "box",
                 "geometry": {
                     # "position": [4.0, 2.0, 2.0], # position for testing height directly at spawn
-                    "position": [-4.0, -2.0, 1.5], # position at hub
+                    "position": [-4.0, -2.0, 0.25], # position at hub
                     "width": 0.1,
-                    "height": 1.0,
+                    "height": 0.5,
                     "length": 2.0,
                 },
                 "low": {"position": [-4.0, -2.0, 1.5]},

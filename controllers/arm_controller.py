@@ -17,7 +17,7 @@ class ArmController():
         self.interp_steps = 50
         self.path = None
         self.step_num = 0
-        self.Kp = 100.0
+        self.Kp = 10.0
         self.vel_lim = 2.0
         self.goal_reached = False
     
@@ -36,7 +36,7 @@ class ArmController():
 
         error_mag = np.linalg.norm(np.array(error_joint))
 
-        if error_mag < math.radians(1):
+        if error_mag < math.radians(0.5):
             self.step_num += 1
 
         cmd_vel = self.Kp * error_joint  
