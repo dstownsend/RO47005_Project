@@ -38,13 +38,10 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         dropoff_cart = [-4.300050067901611, -1.6294126749038695, 0.5583768248558044]
 
         base_pose = p.getLinkState(self.robot_id, 0)
-        print(base_pose[5])
-        
-        
         self.base_pose = base_pose[4]
         self.base_orientation = math.degrees(p.getEulerFromQuaternion(base_pose[5])[2])
 
-        print(self.base_orientation)
+        print(f"Base pose: {base_pose[5]}, base orientation: {self.base_orientation}")
 	
         joint_limits, _ = getMotorJointLimits(self.robot_id)
         self.joint_limits = joint_limits[:7]
@@ -124,8 +121,6 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         
             new_node = TreeNode(new_config, new_cart, parent=nearest_node)
             self.tree.append(new_node)
-            
-            print(len(self.tree))
             
             if self.distance(new_cart, goal_cart) < self.goal_threshold:
                 print(f"Goal reached in {i} iterations") 
@@ -214,16 +209,10 @@ class ArmRRTPlanner(BaseGlobalPlanner):
             bodyB = c[2]
             if bodyB == floor_id:
                 continue
-            print(f"Collision with {bodyB}")
+            #print(f"Collision with {bodyB}")
             return True
 
-        # End effector in base self collision
-
-        # 0.5 length 
-        # 0.4 width 
-        # 0.6 height
-        base_height = 0.6
-        
+        # End effector in base self collision       
         transpose_base = [0.0, 0.0, 0.25]
         base_radius = 0.45
         ee_radius = 0.1
@@ -231,10 +220,9 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         link_state = p.getLinkState(self.robot_id, self.ee_id)
         ee_cart = link_state[4]  # world position
         
-        
         distance = self.distance(ee_cart, np.array(self.base_pose) + np.array(transpose_base))
         if distance <= ee_radius + base_radius:
-            print(f"Self collision")
+            #print(f"Self collision")
             return True
         
 
@@ -244,7 +232,7 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         other_bodies = [b for b in range(p.getNumBodies()) if b != self.robot_id and b != floor_id]
         for b in other_bodies:
             if p.getClosestPoints(bodyA=self.robot_id, bodyB=b, distance=margin):
-                print(f"Contacts within margin {bodyB}")
+                #print(f"Contacts within margin {bodyB}")
                 return True
         return False
     
