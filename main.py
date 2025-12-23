@@ -22,7 +22,7 @@ from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obs
 from environment.scenarios import get_scenario
 
 N_STEPS = 100000
-BASE_START = (0,0)
+BASE_START = (4, 4)
 BASE_GOAL = (-4,-1)
 BASE_GOAL_ORIENTATION = 0 # degrees about global Z axis 
 BASE_CONTROLLER_MPC = False
@@ -131,7 +131,7 @@ def main():
                     logger.warning(f"REACHED WAYPOINT {goal_state}")
                     
                     if not global_path:
-                        logger.warning("REACHED FINAL GOAL")
+                        logger.warning("REACHED RRT TRAVEL FINAL GOALs")
                         phase = "rotate_base"
                         continue
                         
@@ -154,7 +154,7 @@ def main():
                     logger.warning(f"REACHED WAYPOINT {goal_state}")
                     
                     if not global_path:
-                        logger.warning("REACHED FINAL GOAL")
+                        logger.warning("REACHED RRT TRAVEL FINAL GOAL")
                         phase = "rotate_base"
                         continue
                     
@@ -189,7 +189,7 @@ def main():
                 
                 if abs(error_loc) < 0.05:
                     phase = "move_arm"
-                    logger.warning("REACHED BASE POSE FOR ARM FINAL GOAL")
+                    logger.warning("REACHED BASE POSE FOR ARM")
                     
                     
             # Fix arm joint poisitions to avoid API bug
@@ -213,10 +213,12 @@ def main():
                 
                 K_loc = 0.5
                 base_pose = p.getLinkState(robot_id, 0)
-                base_location = base_pose[4][:2]
-                error_loc = BASE_POSE_FOR_ARM[1] - base_location[1]
-                location_vel = -K_loc * error_loc
-                action[0] = location_vel
+                base_location = base_pose[4]
+                p.resetBasePositionAndOrientation(
+                    robot_id,
+                    base_location,
+                    [0,0,0,1]
+                )
                             
             else:
                 action = np.zeros(env.n())
