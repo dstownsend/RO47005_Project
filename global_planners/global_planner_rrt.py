@@ -19,7 +19,7 @@ class RRT_planner:
         self.rewire_count = rewire_count    
 
     def plot_rrt(self, X, obstacles, x_init, x_goal, path, rrt_type, rrt):
-        plot = Plot(f"{rrt_type}")
+        plot = Plot(f"{rrt_type}")        
         plot.plot_tree(X, rrt.trees)
         if path is not None:
             plot.plot_path(X, path)
@@ -27,6 +27,7 @@ class RRT_planner:
             plot.plot_obstacles(X, obstacles)
         plot.plot_start(X, x_init)
         plot.plot_goal(X, x_goal)
+  
         plot.draw(auto_open=True)
 
     def rrt(self, x_init, x_goal, prc, plot_bool=False):

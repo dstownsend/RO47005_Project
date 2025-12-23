@@ -27,16 +27,13 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         self.base_orientation = None
         self.tree = None
         
-    def plan(self, robot_id, visualise=False):
+    def plan(self, robot_id, pickup_cart, dropoff_cart, visualise=False):
         self.robot_id = robot_id
         total_path = []
 
         link_state = p.getLinkState(self.robot_id, self.ee_id)
         start_pos = link_state[4]  # world position
         
-        pickup_cart = [-3.8, -1.6294126749038695, 0.5583768248558044]               
-        dropoff_cart = [-4.300050067901611, -1.6294126749038695, 0.5583768248558044]
-
         base_pose = p.getLinkState(self.robot_id, 0)
         self.base_pose = base_pose[4]
         self.base_orientation = math.degrees(p.getEulerFromQuaternion(base_pose[5])[2])
@@ -50,7 +47,7 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         # Path 1
         path1, cart1, samples_cart = self.rrt(start_pos, pickup_cart)
 
-        draw_waypoint(cart1, color=[0,1,1])
+        draw_waypoint(cart1, color=[0,1,1], pointSize = 5)
         #draw_waypoint(samples_cart, color=[0,0,1])
         if path1 is not None:
             total_path.extend(path1)  
@@ -58,7 +55,7 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         # Path 2
         path2, cart2, samples_cart = self.rrt(pickup_cart, dropoff_cart)
         
-        draw_waypoint(cart2, color=[1,1,0])
+        draw_waypoint(cart2, color=[1,1,0], pointSize = 5)
         #draw_waypoint(samples_cart, color=[1,0,1])
         if path2 is not None:
             total_path.extend(path2)   

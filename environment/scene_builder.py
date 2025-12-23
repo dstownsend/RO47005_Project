@@ -90,6 +90,8 @@ def build_room_walls(
     z_center: float = 1.0,
     name_prefix: str = "wall",
     wall_rgba: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 1.0),
+    wall_rgba_transparent: tuple[float, float, float, float] = (0.0, 1.0, 0.0, 0.5),
+    mid_wall_height = "low",
 ):
     walls = []
 
@@ -188,23 +190,61 @@ def build_room_walls(
         )
     )
     
-    walls.append(
-        BoxObstacle(
-            name=f"hub_middle_wall_+x",
-            content_dict={
-                "type": "box",
-                "geometry": {
-                "position": [-4, -3.5, 0.25 ],
-                    "width": 3,
-                    "height": 0.5,
-                    "length": 0.1,
-                },
-                "low": {"position": [4.0, -3.5, 1.0]},
-                "high": {"position": [4.0, -3.5, 1.0]},
-                "rgba": list(wall_rgba),
-            },
-        )
-    )
+    if mid_wall_height == "high":
+	    walls.append(
+		BoxObstacle(
+		    name=f"hub_middle_wall_+x",
+		    content_dict={
+		        "type": "box",
+		        "geometry": {
+		        "position": [-4, -3.55, 1 ],
+		            "width": 0.9,
+		            "height": 2,
+		            "length": 0.1,
+		        },
+		        "low": {"position": [4.0, -3.5, 1.0]},
+		        "high": {"position": [4.0, -3.5, 1.0]},
+		        "rgba": list(wall_rgba),
+		    },
+		)
+	    )
+    elif mid_wall_height == "middle":
+        walls.append(
+		    BoxObstacle(
+		        name=f"hub_middle_wall_+x",
+		        content_dict={
+		            "type": "box",
+		            "geometry": {
+		            "position": [-4, -3.55, 0.5 ],
+		                "width": 0.9,
+		                "height": 1,
+		                "length": 0.1,
+		            },
+		            "low": {"position": [4.0, -3.5, 1.0]},
+		            "high": {"position": [4.0, -3.5, 1.0]},
+		            "rgba": list(wall_rgba),
+		        },
+		    )
+	        )
+    else:
+        walls.append(
+		    BoxObstacle(
+		        name=f"hub_middle_wall_+x",
+		        content_dict={
+		            "type": "box",
+		            "geometry": {
+		            "position": [-4, -3.55, 0.25 ],
+		                "width": 0.9,
+		                "height": 0.5,
+		                "length": 0.1,
+		            },
+		            "low": {"position": [4.0, -3.5, 1.0]},
+		            "high": {"position": [4.0, -3.5, 1.0]},
+		            "rgba": list(wall_rgba),
+		        },
+		    )
+	        )
+    
     
 
     # +y hub wall obstacle for arm RRT planner
@@ -215,7 +255,7 @@ def build_room_walls(
                 "type": "box",
                 "geometry": {
                     # "position": [4.0, 2.0, 2.0], # position for testing height directly at spawn
-                    "position": [-4.0, -2.0, 0.25], # position at hub
+                    "position": [-4.0, -4.0, 0.25], # position at hub
                     "width": 0.1,
                     "height": 0.5,
                     "length": 2.0,
@@ -309,7 +349,7 @@ def build_moving_cylinder(
     return DynamicCylinderObstacle(name=name, content_dict=content_dict)
 
 
-def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
+def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict, mid_wall_height = "low"):
     """
     Adds walls and configured obstacles to the environment and returns a
     dictionary representation of the static/dynamic obstacles for planners.
@@ -337,7 +377,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict):
     velocity_dt = 1e-2  # small step to numerically approximate velocity
 
     # 1) Walls and Goal Hub
-    for wall in build_room_walls(wall_length=10.0):
+    for wall in build_room_walls(wall_length=10.0, mid_wall_height = mid_wall_height):
         env.add_obstacle(wall)
         obstacles_dict["wall"].append(
             {

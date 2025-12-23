@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<robot name="open_top_box_0p8">
+
+  <link name="box">
+
+    <!-- Bottom -->
+    <visual>
+      <origin xyz="0 0 -0.225"/>
+      <geometry>
+        <box size="0.8 0.8 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.225"/>
+      <geometry>
+        <box size="0.8 0.8 0.05"/>
+      </geometry>
+    </collision>
+
+    <!-- Front wall (+Y) -->
+    <visual>
+      <origin xyz="0 0.375 0"/>
+      <geometry>
+        <box size="0.8 0.05 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.375 0"/>
+      <geometry>
+        <box size="0.8 0.05 0.5"/>
+      </geometry>
+    </collision>
+
+    <!-- Back wall (-Y) -->
+    <visual>
+      <origin xyz="0 -0.375 0"/>
+      <geometry>
+        <box size="0.8 0.05 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.375 0"/>
+      <geometry>
+        <box size="0.8 0.05 0.5"/>
+      </geometry>
+    </collision>
+
+    <!-- Left wall (-X) -->
+    <visual>
+      <origin xyz="-0.375 0 0"/>
+      <geometry>
+        <box size="0.05 0.7 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.375 0 0"/>
+      <geometry>
+        <box size="0.05 0.7 0.5"/>
+      </geometry>
+    </collision>
+
+    <!-- Right wall (+X) -->
+    <visual>
+      <origin xyz="0.375 0 0"/>
+      <geometry>
+        <box size="0.05 0.7 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.375 0 0"/>
+      <geometry>
+        <box size="0.05 0.7 0.5"/>
+      </geometry>
+    </collision>
+
+    <!-- Inertial -->
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="4.0"/>
+      <inertia
+        ixx="0.15" iyy="0.15" izz="0.15"
+        ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+
+  </link>
+
+</robot>
+
