@@ -26,6 +26,7 @@ class ArmController():
     
         if self.step_num == len(self.path):
             self.goal_reached = True
+            print("ARM FINAL GOAL REACHED")
             return action
     
         mpos, mvel, mtorq, names = getMotorJointStates(robot_id) #returns length 13  

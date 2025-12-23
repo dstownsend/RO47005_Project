@@ -68,19 +68,16 @@ class ArmCubicPlanner(BaseGlobalPlanner):
         return joint_path
     
     
-    def plan(self, robot_id, goal, visualise=False):
-
-        pickup_cart = [-3.7000500679016115, -1.6294126749038695, 0.5583768248558044]
-        dropoff_cart = [-4.300050067901611, -1.6294126749038695, 0.5583768248558044]
+    def plan(self, robot_id, pickup_cart, dropoff_cart, visualise=False):
 
         current_pose_cart = list(p.getLinkState(robot_id, self.ee_id)[4])
         
         p1_cart = list(current_pose_cart)
-        p1_cart[1] -= 0.4   
+        p1_cart[1] = pickup_cart[1]   
         p1_cart[2] += 0.1   
         
         p2_cart = list(p1_cart)
-        p2_cart[0] += 0.3   
+        p2_cart[0] = pickup_cart[0]
 
         p3_cart = list(pickup_cart)
        
@@ -88,12 +85,9 @@ class ArmCubicPlanner(BaseGlobalPlanner):
         p4_cart[2] += 0.5  
         
         p5_cart = list(p4_cart)
-        p5_cart[0] -= 0.6
+        p5_cart[0] = dropoff_cart[0]
 
         p6_cart = list(dropoff_cart)
-        
-        p7_cart = list(p6_cart)
-        p7_cart[2] += 0.5
                 
         waypoints = []
         waypoints.append(current_pose_cart)
@@ -103,7 +97,6 @@ class ArmCubicPlanner(BaseGlobalPlanner):
         waypoints.append(p4_cart)
         waypoints.append(p5_cart)
         waypoints.append(p6_cart)
-        waypoints.append(p7_cart)
         
         if visualise:
             draw_line(waypoints)
