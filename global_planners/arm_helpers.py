@@ -23,7 +23,7 @@ def getMotorJointStates(robot_id):
     joint_positions = [state[0] for state in joint_states]
     joint_velocities = [state[1] for state in joint_states]
     joint_torques = [state[3] for state in joint_states]
-    
+
     return joint_positions, joint_velocities, joint_torques, joint_names
     
     

@@ -2,9 +2,11 @@ from .base import BaseGlobalPlanner
 
 import numpy as np
 import pybullet as p
+import time
+
+from datetime import datetime, timezone
 
 from global_planners.arm_helpers import draw_line, draw_waypoint
-
 
 
 class ArmCubicPlanner(BaseGlobalPlanner):
@@ -69,9 +71,11 @@ class ArmCubicPlanner(BaseGlobalPlanner):
     
     
     def plan(self, robot_id, pickup_cart, dropoff_cart, visualise=False):
+        start = time.perf_counter()
 
         current_pose_cart = list(p.getLinkState(robot_id, self.ee_id)[4])
         
+                
         p1_cart = list(current_pose_cart)
         p1_cart[1] = pickup_cart[1]   
         p1_cart[2] += 0.1   
@@ -100,10 +104,19 @@ class ArmCubicPlanner(BaseGlobalPlanner):
         
         if visualise:
             draw_line(waypoints)
-            draw_waypoint(waypoints)
+            draw_waypoint(waypoints)    
             
             
         joint_path = self.plan_joint_path(waypoints, robot_id)
+
+        end = time.perf_counter()
+        elapsed_ms = (end - start) * 1000
+
+        utc_ms = int(time.time() * 1000)
+        result = f"{utc_ms},Arm Cubic, Duration [ms],{elapsed_ms:.3f}\n"
+        with open("ArmResults.txt", "a", encoding="utf-8") as file:
+            file.write(result)
+
 
         return joint_path
 

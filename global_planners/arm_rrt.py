@@ -7,6 +7,8 @@ import random
 import math
 import time
 
+from datetime import datetime, timezone
+
 from global_planners.arm_helpers import draw_line, draw_waypoint, getMotorJointStates, getMotorJointLimits, getJointStates
 
 
@@ -28,6 +30,8 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         self.tree = None
         
     def plan(self, robot_id, pickup_cart, dropoff_cart, visualise=False):
+        start = time.perf_counter()
+    
         self.robot_id = robot_id
         total_path = []
 
@@ -59,6 +63,15 @@ class ArmRRTPlanner(BaseGlobalPlanner):
         #draw_waypoint(samples_cart, color=[1,0,1])
         if path2 is not None:
             total_path.extend(path2)   
+                    
+                    
+        end = time.perf_counter()
+        elapsed_ms = (end - start) * 1000
+
+        utc_ms = int(time.time() * 1000)
+        result = f"{utc_ms},Arm RRT, Duration [ms],{elapsed_ms:.3f}\n"
+        with open("ArmResults.txt", "a", encoding="utf-8") as file:
+            file.write(result)
                     
         return np.array(total_path)
 
@@ -121,6 +134,11 @@ class ArmRRTPlanner(BaseGlobalPlanner):
             
             if self.distance(new_cart, goal_cart) < self.goal_threshold:
                 print(f"Goal reached in {i} iterations") 
+
+                utc_ms = int(time.time() * 1000)
+                result = f"{utc_ms}, Arm RRT, iterations {i}\n"
+                with open("ArmResults.txt", "a", encoding="utf-8") as file:
+                    file.write(result)
                 
                 for idx in range(len(home_config)):
                     p.resetJointState(self.robot_id, idx, home_config[idx])
@@ -132,6 +150,12 @@ class ArmRRTPlanner(BaseGlobalPlanner):
             p.resetJointState(self.robot_id, idx, home_config[idx])
 
         print("RRT failed to find a path")        
+        
+        utc_ms = int(time.time() * 1000)
+        result = f"{utc_ms}, Arm RRT, Planning Failed\n"
+        with open("ArmResults.txt", "a", encoding="utf-8") as file:
+            file.write(result)
+        
         return None
         
         

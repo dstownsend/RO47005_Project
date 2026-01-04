@@ -1,0 +1,211 @@
+1767532508264,low
+1767532508264, SEQUENCE START 0
+1767532649702,Arm Cubic, Duration [ms],171.044
+1767532649785, Arm RRT, iterations 129
+1767532650306, Arm RRT, iterations 758
+1767532650324,Arm RRT, Duration [ms],621.656
+1767532663228,SEQUENCE COMPLETE
+1767532670784,Arm Cubic, {'Collision': 'Collision occured at 139.83 between robot 0 and obstacle with id 7'}
+1767532670813, SEQUENCE START 1
+1767532837403,Arm Cubic, Duration [ms],219.201
+1767532837453, Arm RRT, iterations 75
+1767532837809, Arm RRT, iterations 562
+1767532837836,Arm RRT, Duration [ms],432.844
+1767532848809,SEQUENCE COMPLETE
+1767532870184,Arm Cubic, {'Collision': 'Collision occured at 164.25 between robot 0 and obstacle with id 7'}
+1767532870581, SEQUENCE START 2
+1767532951238,Arm Cubic, Duration [ms],218.620
+1767532951305, Arm RRT, iterations 109
+1767532952273, Arm RRT, iterations 1189
+1767532952303,Arm RRT, Duration [ms],1065.546
+1767532971872,SEQUENCE COMPLETE
+1767532994150,Arm Cubic, {'Collision': 'Collision occured at 95.72 between robot 0 and obstacle with id 7'}
+1767532994188, SEQUENCE START 3
+1767533069325,Arm Cubic, Duration [ms],200.480
+1767533069435, Arm RRT, iterations 166
+1767533070119, Arm RRT, iterations 977
+1767533070124,Arm RRT, Duration [ms],798.693
+1767533092312,SEQUENCE COMPLETE
+1767533107043,Arm Cubic, {'Collision': 'Collision occured at 92.2 between robot 0 and obstacle with id 7'}
+1767533107058, SEQUENCE START 4
+1767533183717,Arm Cubic, Duration [ms],201.707
+1767533183784, Arm RRT, iterations 114
+1767533184046, Arm RRT, iterations 385
+1767533184078,Arm RRT, Duration [ms],360.549
+1767533194392,Arm Cubic, {'Collision': 'Collision occured at 74.19 between robot 0 and obstacle with id 7'}
+1767533194415, SEQUENCE START 5
+1767533388671,Arm Cubic, Duration [ms],204.088
+1767533388883, Arm RRT, iterations 315
+1767533389316, Arm RRT, iterations 627
+1767533389349,Arm RRT, Duration [ms],678.092
+1767533410271,SEQUENCE COMPLETE
+1767533434475,Arm Cubic, {'Collision': 'Collision occured at 212.01 between robot 0 and obstacle with id 7'}
+1767533434491, SEQUENCE START 6
+1767533529435,Arm Cubic, Duration [ms],205.722
+1767533529556, Arm RRT, iterations 204
+1767533529919, Arm RRT, iterations 590
+1767533529931,Arm RRT, Duration [ms],495.168
+1767533549794,SEQUENCE COMPLETE
+1767533558266,Arm Cubic, {'Collision': 'Collision occured at 101.66 between robot 0 and obstacle with id 7'}
+1767533558290, SEQUENCE START 7
+1767533643975,Arm Cubic, Duration [ms],202.472
+1767533644289, Arm RRT, iterations 417
+1767533644576, Arm RRT, iterations 429
+1767533644608,Arm RRT, Duration [ms],632.628
+1767533660875,SEQUENCE COMPLETE
+1767533685224,Arm Cubic, {'Collision': 'Collision occured at 104.69 between robot 0 and obstacle with id 7'}
+1767533685268, SEQUENCE START 8
+1767533826253,Arm Cubic, Duration [ms],206.330
+1767533826306, Arm RRT, iterations 80
+1767533826708, Arm RRT, iterations 604
+1767533826728,Arm RRT, Duration [ms],474.970
+1767533839512,SEQUENCE COMPLETE
+1767533850622,Arm Cubic, {'Collision': 'Collision occured at 128.76 between robot 0 and obstacle with id 7'}
+1767533850651, SEQUENCE START 9
+1767533947138,Arm Cubic, Duration [ms],217.386
+1767533947172, Arm RRT, iterations 51
+1767533947633, Arm RRT, iterations 665
+1767533947655,Arm RRT, Duration [ms],516.579
+1767533959954,Arm Cubic, {'Collision': 'Collision occured at 90.6 between robot 0 and obstacle with id 7'}
+1767533959987,middle
+1767533959987, SEQUENCE START 0
+1767534048159,Arm Cubic, Duration [ms],209.484
+1767534048252, Arm RRT, iterations 157
+1767534049107, Arm RRT, iterations 1147
+1767534049128,Arm RRT, Duration [ms],968.874
+1767534070354,SEQUENCE COMPLETE
+1767534093088,Arm Cubic, {'Collision': 'Collision occured at 111.91 between robot 0 and obstacle with id 7'}
+1767534093139, SEQUENCE START 1
+1767534155227,Arm Cubic, Duration [ms],200.131
+1767534155296, Arm RRT, iterations 104
+1767534156205, Arm RRT, iterations 1208
+1767534156210,Arm RRT, Duration [ms],982.350
+1767534176353,SEQUENCE COMPLETE
+1767534196024,Arm Cubic, {'Collision': 'Collision occured at 89.28 between robot 0 and obstacle with id 7'}
+1767534196049, SEQUENCE START 2
+1767534253737,Arm Cubic, Duration [ms],212.462
+1767534253788, Arm RRT, iterations 89
+1767534254502, Arm RRT, iterations 984
+1767534254513,Arm RRT, Duration [ms],776.129
+1767534274421,SEQUENCE COMPLETE
+1767534281023,Arm Cubic, {'Collision': 'Collision occured at 72.52 between robot 0 and obstacle with id 7'}
+1767534281051, SEQUENCE START 3
+1767534354146,Arm Cubic, Duration [ms],172.352
+1767534354204, Arm RRT, iterations 97
+1767534354709, Arm RRT, iterations 756
+1767534354720,Arm RRT, Duration [ms],573.909
+1767534373844,SEQUENCE COMPLETE
+1767534394406,Arm Cubic, {'Collision': 'Collision occured at 94.93 between robot 0 and obstacle with id 7'}
+1767534394424, SEQUENCE START 4
+1767534471871,Arm Cubic, Duration [ms],217.009
+1767534471910, Arm RRT, iterations 60
+1767534472376, Arm RRT, iterations 697
+1767534472408,Arm RRT, Duration [ms],536.098
+1767534482863,SEQUENCE COMPLETE
+1767534504797,Arm Cubic, {'Collision': 'Collision occured at 90.31 between robot 0 and obstacle with id 7'}
+1767534504817, SEQUENCE START 5
+1767534604102,Arm Cubic, Duration [ms],201.278
+1767534604288, Arm RRT, iterations 296
+1767534604672, Arm RRT, iterations 572
+1767534604700,Arm RRT, Duration [ms],597.301
+1767534623783,SEQUENCE COMPLETE
+1767534643183,Arm Cubic, {'Collision': 'Collision occured at 117.07 between robot 0 and obstacle with id 7'}
+1767534643209, SEQUENCE START 6
+1767534701156,Arm Cubic, Duration [ms],228.644
+1767534701205, Arm RRT, iterations 85
+1767534701467, Arm RRT, iterations 393
+1767534701495,Arm RRT, Duration [ms],339.266
+1767534714222,SEQUENCE COMPLETE
+1767534723381,Arm Cubic, {'Collision': 'Collision occured at 68.54 between robot 0 and obstacle with id 7'}
+1767534723416, SEQUENCE START 7
+1767534804288,Arm Cubic, Duration [ms],221.082
+1767534804334, Arm RRT, iterations 63
+1767534805093, Arm RRT, iterations 1055
+1767534805105,Arm RRT, Duration [ms],816.530
+1767534824673,SEQUENCE COMPLETE
+1767534847896,Arm Cubic, {'Collision': 'Collision occured at 109.54 between robot 0 and obstacle with id 7'}
+1767534847946, SEQUENCE START 8
+1767534923525,Arm Cubic, Duration [ms],218.011
+1767534923677, Arm RRT, iterations 229
+1767534924064, Arm RRT, iterations 594
+1767534924091,Arm RRT, Duration [ms],565.696
+1767534935101,SEQUENCE COMPLETE
+1767534944235,Arm Cubic, {'Collision': 'Collision occured at 76.96 between robot 0 and obstacle with id 7'}
+1767534944277, SEQUENCE START 9
+1767535027327,Arm Cubic, Duration [ms],201.492
+1767535027398, Arm RRT, iterations 118
+1767535028180, Arm RRT, iterations 1073
+1767535028203,Arm RRT, Duration [ms],875.492
+1767535049405,SEQUENCE COMPLETE
+1767535067876,Arm Cubic, {'Collision': 'Collision occured at 103.53 between robot 0 and obstacle with id 7'}
+1767535067916,high
+1767535067916, SEQUENCE START 0
+1767535208027,Arm Cubic, Duration [ms],191.601
+1767535208071, Arm RRT, iterations 81
+1767535208634, Arm RRT, iterations 814
+1767535208638,Arm RRT, Duration [ms],611.184
+1767535228426,SEQUENCE COMPLETE
+1767535252234,Arm Cubic, {'Collision': 'Collision occured at 143.36 between robot 0 and obstacle with id 7'}
+1767535252274, SEQUENCE START 1
+1767535440447,Arm Cubic, Duration [ms],218.311
+1767535440518, Arm RRT, iterations 115
+1767535441238, Arm RRT, iterations 1045
+1767535441244,Arm RRT, Duration [ms],796.639
+1767535461832,SEQUENCE COMPLETE
+1767535480089,Arm Cubic, {'Collision': 'Collision occured at 193.35 between robot 0 and obstacle with id 7'}
+1767535480120, SEQUENCE START 2
+1767535563455,Arm Cubic, Duration [ms],204.657
+1767535563530, Arm RRT, iterations 113
+1767535564503, Arm RRT, iterations 1283
+1767535564526,Arm RRT, Duration [ms],1071.042
+1767535582968,SEQUENCE COMPLETE
+1767535603196,Arm Cubic, {'Collision': 'Collision occured at 102.88 between robot 0 and obstacle with id 7'}
+1767535603242, SEQUENCE START 3
+1767535681273,Arm Cubic, Duration [ms],214.582
+1767535681320, Arm RRT, iterations 80
+1767535681651, Arm RRT, iterations 524
+1767535681674,Arm RRT, Duration [ms],400.151
+1767535692887,SEQUENCE COMPLETE
+1767535697947,Arm Cubic, {'Collision': 'Collision occured at 76.11 between robot 0 and obstacle with id 7'}
+1767535697990, SEQUENCE START 4
+1767535771348,Arm Cubic, Duration [ms],221.327
+1767535771448, Arm RRT, iterations 170
+1767535771685, Arm RRT, iterations 297
+1767535771715,Arm RRT, Duration [ms],367.279
+1767535783131,SEQUENCE COMPLETE
+1767535805802,Arm Cubic, {'Collision': 'Collision occured at 89.61 between robot 0 and obstacle with id 7'}
+1767535805833, SEQUENCE START 5
+1767535890904,Arm Cubic, Duration [ms],193.143
+1767535890962, Arm RRT, iterations 96
+1767535891519, Arm RRT, iterations 824
+1767535891553,Arm RRT, Duration [ms],649.047
+1767535902277,SEQUENCE COMPLETE
+1767535908275,Arm Cubic, {'observation_limits': 'key: velocity: [-3.53071307e-07  1.07696856e-05 -2.08024822e-04 -1.15251447e-03\n -1.59515672e-03 -8.28716051e-03 -1.05112889e-02  8.39707924e-03\n -4.20654827e-02 -3.53858742e-02 -1.31058172e-03 -2.64516183e-01] not in Box([ -4.     -4.    -10.     -2.175  -2.175  -2.175  -2.175  -2.61   -2.61\n  -2.61   -0.2    -0.2  ], [ 4.     4.    10.     2.175  2.175  2.175  2.175  2.61   2.61   2.61\n  0.2    0.2  ], (12,), float64)\nAt index [11]: [-0.26451618] < [-0.2]'}
+1767535908319, SEQUENCE START 6
+1767535989630,Arm Cubic, Duration [ms],203.780
+1767535989742, Arm RRT, iterations 172
+1767535990188, Arm RRT, iterations 658
+1767535990205,Arm RRT, Duration [ms],574.969
+1767536010473,SEQUENCE COMPLETE
+1767536017780,Arm Cubic, {'Collision': 'Collision occured at 92.01 between robot 0 and obstacle with id 7'}
+1767536017821, SEQUENCE START 7
+1767536113651,Arm Cubic, Duration [ms],220.849
+1767536113803, Arm RRT, iterations 230
+1767536114084, Arm RRT, iterations 416
+1767536114113,Arm RRT, Duration [ms],462.388
+1767536129714,SEQUENCE COMPLETE
+1767536149274,Arm Cubic, {'Collision': 'Collision occured at 112.22 between robot 0 and obstacle with id 7'}
+1767536149298, SEQUENCE START 8
+1767536250914,Arm Cubic, Duration [ms],156.531
+1767536251024, Arm RRT, iterations 161
+1767536251766, Arm RRT, iterations 1024
+1767536251796,Arm RRT, Duration [ms],881.551
+1767536273670,SEQUENCE COMPLETE
+1767536282265,Arm Cubic, {'Collision': 'Collision occured at 114.37 between robot 0 and obstacle with id 7'}
+1767536282290, SEQUENCE START 9
+1767536369870,Arm Cubic, Duration [ms],197.675
+1767536369921, Arm RRT, iterations 81
+1767536370033, Arm RRT, iterations 169
+1767536370036,Arm RRT, Duration [ms],166.213
+1767536381102,SEQUENCE COMPLETE
+1767536719378,Arm Cubic, {'Collision': 'Collision occured at 406.88 between robot 0 and obstacle with id 7'}
