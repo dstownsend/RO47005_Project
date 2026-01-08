@@ -6,16 +6,18 @@ from acados_template import AcadosModel, AcadosOcp, AcadosOcpSolver
 from casadi import SX, vertcat, sin, cos, sqrt
 
 from .base import BaseLocalPlanner
+from utils.utils import generate_reference_to_lookahead
 
 NUM_HORIZON_STEPS = 60
-TIME_HORIZON_S = 3.0
+TIME_HORIZON_S = 10.0
 V_MAX_M_S = 1.
 OMEGA_MAX_RAD_S = 1.
-INFLATION_M = 0.5 # robot is about 0.35 radius, add some buffer
+INFLATION_M = 0.8 # robot is about 0.35 radius, add some buffer
 # Cost to minimize distance to goal and control effort
-Q_MAT = np.diag([200,200,0.1])  # [x,y,theta]
-Q_MAT_E = np.diag([200,200,1])  # [x,y,theta]
-R_MAT = np.diag([10, 10])  # [v, theta_d]
+Q_MAT = np.diag([20,20,0.1])  # [x,y,theta]
+Q_MAT_E = np.diag([20,20,1])  # [x,y,theta]
+R_MAT = np.diag([10, 10])  # [v, theta_d] 
+OBS_SOFT_COST = 8.0
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -44,7 +46,7 @@ class MPC(BaseLocalPlanner):
         x = x0.copy()
 
         for j in range(self.ocp_solver.N):
-            u = np.array([0.3, 0.2])  # small forward motion
+            u = np.array([0.1, 0.1])  # small forward motion
             self.ocp_solver.set(j, "x", x)
             self.ocp_solver.set(j, "u", u)
 
@@ -60,18 +62,23 @@ class MPC(BaseLocalPlanner):
     def plan(self, current_state, goal_state, map_data):
         # TODO: add constraints to ocp based on obstacles
         # Set goal (or traj) in solver
-        self.yref[:len(goal_state)] = goal_state # here we leave control refs at 0
-        self.yref_e = goal_state
+        xref_traj = generate_reference_to_lookahead(current_state, goal_state, self.ocp_solver.N, TIME_HORIZON_S / self.ocp_solver.N, V_MAX_M_S)
         for j in range(self.ocp_solver.N):
+            self.yref[:3] = xref_traj[j]
             self.ocp_solver.set(j, "yref", self.yref)
+        self.ocp_solver.set(self.ocp_solver.N, "yref", xref_traj[self.ocp_solver.N])
+        # self.yref[:len(goal_state)] = goal_state # here we leave control refs at 0
+        # self.yref_e = goal_state
+        # for j in range(self.ocp_solver.N):
+        #     self.ocp_solver.set(j, "yref", self.yref)
         obstacle = map_data["static"][0]  # only first obstacle for now
         p = np.array([obstacle["position"][0], obstacle["position"][1], obstacle["radius"]+INFLATION_M])
-        # for j in range(self.ocp_solver.N+1):
-        #     # Set all obstacles as constraints
-        #     # for obstacle in map_data["static"]:
-        #     self.ocp_solver.set(j, "p", p)
+        for j in range(self.ocp_solver.N+1):
+            # Set all obstacles as constraints
+            # for obstacle in map_data["static"]:
+            self.ocp_solver.set(j, "p", p)
 
-        self.ocp_solver.set(self.ocp_solver.N, "yref", self.yref_e)
+        # self.ocp_solver.set(self.ocp_solver.N, "yref", self.yref_e)
         
         logger.debug(f"\t MPC cost: {self.ocp_solver.get_cost()}")
         logger.debug(current_state) 
@@ -148,9 +155,19 @@ class MPC(BaseLocalPlanner):
         ocp.constraints.x0 = np.array([0.0, 0.0, 0.0]) # Just to initialize, will be set at each plan() call
         
         # For obstacles
-        # ocp.constraints.lh = np.array([0.0]) #obs avoidance, must be >=0
-        # ocp.constraints.uh = np.array([1e8])   # large to indicate no upper bound
+        ocp.constraints.lh = np.array([0.0]) #obs avoidance, must be >=0
+        ocp.constraints.uh = np.array([1e8])   # large to indicate no upper bound
         ocp.parameter_values = np.zeros(3)
+        
+        # index of softened h-constraint (see con_h_expr)
+        ocp.constraints.idxsh = np.array([0])   
+
+        # Quadratic slack penalty (s^2*Z + s*z)
+        ocp.cost.Zl = np.array([OBS_SOFT_COST])
+        ocp.cost.Zu = np.array([OBS_SOFT_COST]) # upper bound irrelevant because of uh, but still must be set.
+
+        ocp.cost.zl = np.array([OBS_SOFT_COST])
+        ocp.cost.zu = np.array([OBS_SOFT_COST])
 
         return ocp
     
@@ -198,7 +215,7 @@ def create_robot_model() -> AcadosModel:
     model.f_expl_expr = f_expl
     model.x = state_vector
     model.u = control_vector
-    # model.con_h_expr = sqrt((x - p[0])**2 + (y - p[1])**2 + 1e-6) - p[2]  # should be >= 0, small value to prevent sqrt(0)
+    model.con_h_expr = ((x - p[0])**2 + (y - p[1])**2 + 1e-6) - p[2]**2  # should be >= 0, small value to prevent sqrt(0)
     model.p = p # set this in the ocp before each solve
     model.name = model_name
 

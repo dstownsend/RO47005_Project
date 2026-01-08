@@ -1,7 +1,5 @@
-from threading import local
 import numpy as np
 import logging
-import time
 
 import gymnasium as gym
 from urdfenvs.robots.generic_urdf.generic_diff_drive_robot import GenericDiffDriveRobot
@@ -20,10 +18,12 @@ from local_planners import mpc
 from environment.scene_builder import apply_scenario_to_env, refresh_dynamic_obstacle_states
 from environment.scenarios import get_scenario
 from utils.visualization import draw_points_and_path, PathUpdater
+from utils.utils import generate_reference_to_lookahead, get_lookahead_point
 
 N_STEPS = 100000
 BASE_START = (3,3)
 BASE_GOAL = (-4,-1)
+DIST_THRESH_M = 0.5
 # ARM_START =
 # ARM_GOAL =
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def main():
     ########## Set variables for RRT_planners ################
     #X_dimensions = np.array([(-4.5,4.5),(-4.5,4.5)]) # change once we know the actual dim of the final workspace
     X_dimensions = np.array([(-5,10),(-5,10)]) # change once we know the actual dim of the final workspace
-    # print(obstacles)
+    # print("OBSTACLES", obstacles)
         
     # obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here
     # obstacles_rrt = dilate_obstacles(obstacles_rrt,0.23365)  # 0.3365 m  is max halfwidth of albert base, check if all distances in env are in m
@@ -77,8 +77,8 @@ def main():
     draw_points_and_path(global_path, lifetime=0)
 
     action = np.zeros(env.n())
-    next_vertex = global_path.pop(0)
-    goal_state = np.append(next_vertex, 0.0)
+    # next_vertex = global_path.pop(0)
+    # goal_state = np.append(next_vertex, 0.0)
     
     arm_global_planner = arm_cubic.ArmCubicPlanner()
     arm_controller = ArmController()
@@ -102,25 +102,31 @@ def main():
     for step in range(N_STEPS):
         if phase == "move_base":
             # 2b. Navigation local replan (dynamic obs)
-            # TODO: once done, switch phase to move_arm
             current_state = ob["robot_0"]["joint_state"]["position"][:3]
-            # goal_state = np.array([-4.0, 1.0, 0.0])
-            cost = local_planner.ocp_solver.get_cost()
-            if cost < 20:
-                logger.warning(f"REACHED WAYPOINT {goal_state}")
+            # cost = local_planner.ocp_solver.get_cost()
+            # logger.info(f"cost: {cost}")
+            dist_to_wp = np.linalg.norm(current_state[:2] - global_path[0][:2])
+            logger.info(f"distance to waypoint: {dist_to_wp}")
+            if dist_to_wp < DIST_THRESH_M:
+                logger.warning(f"REACHED WAYPOINT {global_path[0]}")
                 if not global_path:
                     logger.warning("REACHED FINAL GOAL")
                     phase = "move_arm"
                     continue
+                # remove the reached point
                 next_vertex = global_path.pop(0)
-                goal_state = np.append(next_vertex, 0.0)
+                # goal_state = np.append(next_vertex, 0.0)
+                
                 local_planner.flag_first_solve = True # reset warm start for new goal
-            vehicle_control = local_planner.plan(current_state, goal_state, obstacles)
+            logger.debug(f"current state: {current_state}")
+            lookahead_point = get_lookahead_point(global_path, current_state[:2], 3.0)
+            draw_points_and_path(lookahead_point.reshape(1,2), lifetime=0.1)
+            vehicle_control = local_planner.plan(current_state, lookahead_point, obstacles)
             smooth_vel = np.clip(vehicle_control[0], last_vel - 0.02, last_vel + 0.02)
             mpc_traj = local_planner.get_trajectory()
             if step % 10 == 0:
                 drawer.draw_path(mpc_traj)
-            logger.info(f"vehicle control: {vehicle_control}")
+            logger.debug(f"vehicle control: {vehicle_control}")
             
             action = arm_controller.compute_vel_single(robot_id, desired_arm_joint_pos)
             action[:2] = vehicle_control
