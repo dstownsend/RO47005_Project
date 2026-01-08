@@ -23,7 +23,7 @@ from utils.utils import generate_reference_to_lookahead, get_lookahead_point
 N_STEPS = 100000
 BASE_START = (3,3)
 BASE_GOAL = (-4,-1)
-DIST_THRESH_M = 0.5
+DIST_THRESH_M = 0.8
 # ARM_START =
 # ARM_GOAL =
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ def main():
     ########## Set variables for RRT_planners ################
     #X_dimensions = np.array([(-4.5,4.5),(-4.5,4.5)]) # change once we know the actual dim of the final workspace
     X_dimensions = np.array([(-5,10),(-5,10)]) # change once we know the actual dim of the final workspace
-    # print("OBSTACLES", obstacles)
+    print("OBSTACLES", obstacles)
         
     # obstacles_rrt = sphere_to_square(obstacles) # Possibly change type or dim here
     # obstacles_rrt = dilate_obstacles(obstacles_rrt,0.23365)  # 0.3365 m  is max halfwidth of albert base, check if all distances in env are in m
@@ -71,7 +71,7 @@ def main():
     
     # 2a. Navigation global plan 
     # global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
-    global_path = [BASE_START, (2,2), BASE_GOAL] # for testing
+    global_path = [BASE_START, (2,2), (-2,-1), BASE_GOAL] # for testing
     logger.info(f"GLOBAL PATH IS: {global_path}")
 
     draw_points_and_path(global_path, lifetime=0)

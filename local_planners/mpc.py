@@ -120,7 +120,7 @@ class MPC(BaseLocalPlanner):
         ocp.solver_options.nlp_solver_warm_start_first_qp = True
         ocp.solver_options.nlp_solver_warm_start_first_qp_from_nlp = True
         ocp.solver_options.integrator_type = "ERK" # required for explicit model
-        ocp.solver_options.nlp_solver_type = "SQP" # sometimes no solutions without rti
+        ocp.solver_options.nlp_solver_type = "SQP_RTI" # sometimes no solutions without rti
         ocp.solver_options.nlp_solver_max_iter = 1000 # default max_iter is 100, errors if no solution found
         
         # Cost
