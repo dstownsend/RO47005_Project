@@ -21,9 +21,9 @@ SCENARIOS = {
         "dynamic": [
             {
                 # Starts at start_time, moves at speed toward end, stops at final position.
-                "start": [-2.0, 0.0, 0.1],
+                "start": [0.5, 3.5, 0.1],
                 "end": [4.0, -3.0, 0.1],
-                "speed": 5,
+                "speed": 2.0,
                 "start_time": 2.0,
                 "radius": 0.5,
             },

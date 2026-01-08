@@ -31,7 +31,7 @@ logger.setLevel(logging.INFO)
 
 def main():
     # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="one_static") #empty, one_static, dynamic_and_static
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="one_dynamic") #empty, one_static, dynamic_and_static
     # ob = env.reset(
     #     pos=np.array([0.0, 0.0, 3.14159, 0.0, 0.0, 0.0, -1.5, 0.0, 1.8, 0.5])
     # )[0]

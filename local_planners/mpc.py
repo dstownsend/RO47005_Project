@@ -16,8 +16,8 @@ INFLATION_M = 0.8 # robot is about 0.35 radius, add some buffer
 # Cost to minimize distance to goal and control effort
 Q_MAT = np.diag([20,20,0.1])  # [x,y,theta]
 Q_MAT_E = np.diag([20,20,1])  # [x,y,theta]
-R_MAT = np.diag([10, 10])  # [v, theta_d] 
-OBS_SOFT_COST = 8.0
+R_MAT = np.diag([0.1, 0.1])  # [v, theta_d] 
+OBS_SOFT_COST = 20.0
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -71,9 +71,19 @@ class MPC(BaseLocalPlanner):
         # self.yref_e = goal_state
         # for j in range(self.ocp_solver.N):
         #     self.ocp_solver.set(j, "yref", self.yref)
-        obstacle = map_data["static"][0]  # only first obstacle for now
-        p = np.array([obstacle["position"][0], obstacle["position"][1], obstacle["radius"]+INFLATION_M])
+        obstacle = map_data["dynamic"][0]  # only first obstacle for now
+        # p = np.array([obstacle["position"][0], obstacle["position"][1], obstacle["radius"]+INFLATION_M])
+        t0 = obstacle["start_time"]
+        t_end = obstacle["end_time"]
+        radius = obstacle["radius"]
+        p0 = np.array(obstacle["position"][:2])  # only x, y
+        v = np.array(obstacle["velocity"][:2])
         for j in range(self.ocp_solver.N+1):
+            current_time = j * (TIME_HORIZON_S / self.ocp_solver.N)
+            t_clipped = min(max(current_time, t0), t_end)
+            dt = t_clipped - t0
+            p_obs = p0 + v * dt
+            p = np.array([p_obs[0], p_obs[1], radius + INFLATION_M])
             # Set all obstacles as constraints
             # for obstacle in map_data["static"]:
             self.ocp_solver.set(j, "p", p)
@@ -116,6 +126,7 @@ class MPC(BaseLocalPlanner):
         ocp.solver_options.qp_solver = "PARTIAL_CONDENSING_HPIPM" 
         ocp.solver_options.hessian_approx = "GAUSS_NEWTON"
         ocp.solver_options.regularize_method = "PROJECT"
+        # ocp.solver_options.nlp_solver_tol_stat = 1e-3 # defaults 1e-6
         ocp.solver_options.qp_solver_warm_start = 2
         ocp.solver_options.nlp_solver_warm_start_first_qp = True
         ocp.solver_options.nlp_solver_warm_start_first_qp_from_nlp = True
