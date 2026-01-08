@@ -1,9 +1,12 @@
-from global_planner_rrt import RRT_planner
+from .global_planner_rrt import RRT_planner
+
 from rrt_algorithms.utilities.plotting import Plot
 from rrt_algorithms.search_space.search_space import SearchSpace
 import math
 import plotly
 import plotly.graph_objects as go
+
+
 
 class RRT_type_comparison:
     def __init__(self,X_dimensions,obstacles,q,r,max_samples,rewire_count,x_init,x_goal,prc):
@@ -79,6 +82,8 @@ class RRT_type_comparison:
         path_base, path_star, path_star_bd, path_star_bd_h, path_connect = self.path_results()
 
         def path_length(points):
+            if points is None or len(points) < 2:
+                return 0.0 # the length is not 0.0 but this allows us to easily iterate later on 
             total = 0.0
             for i in range(1, len(points)):
                 x1, y1 = points[i-1]

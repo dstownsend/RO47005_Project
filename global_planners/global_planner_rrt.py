@@ -8,6 +8,9 @@ from rrt_algorithms.rrt.rrt_star_bid import RRTStarBidirectional
 from rrt_algorithms.search_space.search_space import SearchSpace
 from rrt_algorithms.utilities.plotting import Plot
 
+import time
+import os
+import psutil
 
 class RRT_planner:
     def __init__(self, X_dimensions, obstacles, q, r, max_samples, rewire_count):
@@ -149,3 +152,49 @@ class RRT_planner:
         rrt.rrt_connect()
         return rrt.samples_taken
 
+    @staticmethod
+    def _measure_runtime_cpu(run_callable):
+        p = psutil.Process(os.getpid())
+        cpu_start = p.cpu_times()
+        t_start = time.perf_counter()
+        result = run_callable()
+        t_end = time.perf_counter()
+        cpu_end = p.cpu_times()
+        wall = t_end - t_start
+        cpu = (cpu_end.user + cpu_end.system) - (cpu_start.user + cpu_start.system)
+        cpu_pct = 100.0 * cpu / wall if wall > 0 else 0.0
+        return result, wall, cpu_pct
+
+    def rrt_runtime_cpu(self, x_init, x_goal, prc):
+        X = SearchSpace(self.X_dimensions, self.obstacles)
+        rrt = RRT(X, self.q, x_init, x_goal, self.max_samples, self.r, prc)
+        _, wall, cpu_pct = self._measure_runtime_cpu(rrt.rrt_search)
+        return wall, cpu_pct
+
+    def rrt_star_runtime_cpu(self, x_init, x_goal, prc):
+        X = SearchSpace(self.X_dimensions, self.obstacles)
+        rrt = RRTStar(X, self.q, x_init, x_goal, self.max_samples, self.r, prc, self.rewire_count)
+        _, wall, cpu_pct = self._measure_runtime_cpu(rrt.rrt_star)
+        return wall, cpu_pct
+
+    def rrt_star_bd_runtime_cpu(self, x_init, x_goal, prc):
+        X = SearchSpace(self.X_dimensions, self.obstacles)
+        rrt = RRTStarBidirectional(
+            X, self.q, x_init, x_goal, self.max_samples, self.r, prc, self.rewire_count
+        )
+        _, wall, cpu_pct = self._measure_runtime_cpu(rrt.rrt_star_bidirectional)
+        return wall, cpu_pct
+
+    def rrt_star_bd_h_runtime_cpu(self, x_init, x_goal, prc):
+        X = SearchSpace(self.X_dimensions, self.obstacles)
+        rrt = RRTStarBidirectionalHeuristic(
+            X, self.q, x_init, x_goal, self.max_samples, self.r, prc, self.rewire_count
+        )
+        _, wall, cpu_pct = self._measure_runtime_cpu(rrt.rrt_star_bid_h)
+        return wall, cpu_pct
+
+    def rrt_connect_runtime_cpu(self, x_init, x_goal, prc):
+        X = SearchSpace(self.X_dimensions, self.obstacles)
+        rrt = RRTConnect(X, self.q, x_init, x_goal, self.max_samples, self.r, prc)
+        _, wall, cpu_pct = self._measure_runtime_cpu(rrt.rrt_connect)
+        return wall, cpu_pct
