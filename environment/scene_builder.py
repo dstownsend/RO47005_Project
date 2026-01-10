@@ -279,6 +279,7 @@ def build_static_cylinder(
     low: dict | None = None,
     high: dict | None = None,
     randomize: bool = False,
+    seed:int = None
 ):
     content_dict = {
         "type": "cylinder",
@@ -307,6 +308,9 @@ def build_static_cylinder(
 
     cyl = CylinderObstacle(name=name, content_dict=content_dict)
     if randomize or low or high:
+        if seed is not None:
+            import random; random.seed(seed)
+            import numpy; numpy.random.seed(seed)
         cyl.shuffle()
     return cyl
 
@@ -349,7 +353,7 @@ def build_moving_cylinder(
     return DynamicCylinderObstacle(name=name, content_dict=content_dict)
 
 
-def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict, mid_wall_height = "low"):
+def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict, mid_wall_height = "low", seed:int = None):
     """
     Adds walls and configured obstacles to the environment and returns a
     dictionary representation of the static/dynamic obstacles for planners.
@@ -400,6 +404,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict, mid_wall_height = "l
             low=s_cfg.get("low"),
             high=s_cfg.get("high"),
             randomize=s_cfg.get("randomize", False),
+            seed=seed,
         )
         env.add_obstacle(cyl)
         obstacles_dict["static"].append(

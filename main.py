@@ -25,7 +25,8 @@ N_STEPS = 100000
 BASE_START = (4, 4)
 BASE_GOAL = (-4,-1)
 BASE_GOAL_ORIENTATION = 0 # degrees about global Z axis 
-BASE_CONTROLLER_MPC = False
+BASE_CONTROLLER_MPC = True # True for MPC, False for PI
+RANDOM_SEED = None # None (randomize), or int. Set to get repeatable env.
 
 BASE_POSE_FOR_ARM = [-4,-2.6]
 ARM_PICKUP = [-3.7, -3.1, 0.6]   
@@ -38,7 +39,7 @@ logger.setLevel(logging.INFO)
 
 def main():
 # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static # random_static
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="many_static") #empty, one_static, dynamic_and_static # random_static
     ob, *_ = env.step(np.zeros(11))
 
     history = []
@@ -65,7 +66,7 @@ def main():
     local_planner = mpc.create_mpc_planner()
     
     # 2a. Navigation global plan 
-    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=True)
+    global_path = RRT_planner.plan(rrt_type = 'rrt_star_bidirectional_plus_heuristic', x_init = BASE_START, x_goal = BASE_GOAL, prc = prc, plot_bool=False)
     logger.info(f"GLOBAL PATH IS: {global_path}")
        
     global_path_waypoints =[]
@@ -119,6 +120,7 @@ def main():
     desired_arm_joint_pos = mpos[:7]
         
     # Main loop
+    start = time.time()
     for step in range(N_STEPS):
         if phase == "move_base":
             # 2b. Navigation local replan (dynamic obs)
@@ -133,6 +135,11 @@ def main():
                     if not global_path:
                         logger.warning("REACHED RRT TRAVEL FINAL GOALs")
                         phase = "rotate_base"
+                        time_taken = time.time() - start
+                        with open("results.txt", "a") as f:
+                            f.write(f"MPC, seed {RANDOM_SEED}: {time_taken:.4f} seconds\n")
+                        logger.info(f"MPC, seed {RANDOM_SEED}: {time_taken:.4f} seconds")
+
                         continue
                         
                     next_vertex = global_path.pop(0)
@@ -156,6 +163,10 @@ def main():
                     if not global_path:
                         logger.warning("REACHED RRT TRAVEL FINAL GOAL")
                         phase = "rotate_base"
+                        time_taken = time.time() - start
+                        with open("results.txt", "a") as f:
+                            f.write(f"PI, seed {RANDOM_SEED}: {time_taken:.4f} seconds\n")
+                        logger.info(f"PI, seed {RANDOM_SEED}: {time_taken:.4f} seconds")
                         continue
                     
                     next_vertex = global_path.pop(0)
@@ -166,7 +177,7 @@ def main():
                  p.resetJointState(robot_id, joint_index+7, desired_arm_joint_pos[joint_index]);
                         
         elif phase == "rotate_base":
-        
+            
             base_pose = p.getLinkState(robot_id, 0)
             base_location = base_pose[4][:2]
             #print(base_location)
@@ -286,11 +297,11 @@ def create_env_with_obstacles(
     
     # Spawn in walls and obstacles returns obstacle dictionary (walls, static, dynamic)
     if MID_WALL_HEIGHT == "high":
-        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "high")
+        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "high", seed=RANDOM_SEED)
     elif MID_WALL_HEIGHT == "middle":
-        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "middle")
+        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "middle", seed=RANDOM_SEED)
     else:
-        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "low")
+        obs = apply_scenario_to_env(env, scenario_cfg, mid_wall_height = "low", seed=RANDOM_SEED)
 
     # Camera perspectives
     #env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye

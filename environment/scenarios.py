@@ -16,6 +16,15 @@ SCENARIOS = {
         ],
         "dynamic": [],
     },
+    "many_static": {
+        "static": [
+            # {"position": [0.0, 0.0, 0.0], "radius": 0.75},
+            {"position": [2, -0, 0.0], "radius": 0.75},
+            {"position": [-2, 2, 0.0], "radius": 0.75},
+            {"position": [-2.0, 0.0, 0.0], "radius": 0.75},
+        ],
+        "dynamic": [],
+    },
     "one_dynamic": {
         "static": [],
         "dynamic": [

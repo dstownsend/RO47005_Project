@@ -1,0 +1,21 @@
+Run main in diff env and measure total time taken for base movement. 
+PI, seed 10: 57.2277 seconds
+MPC, seed 10: 45.2813 seconds
+MPC, seed 11: 43.3552 seconds
+PI, seed 11: 49.3605 seconds
+PI, seed 12: 64.7561 seconds
+MPC, seed 12: 43.1553 seconds
+MPC, seed 13: 44.0162 seconds
+PI, seed 13: 63.9604 seconds
+PI, seed 15: 42.6326 seconds
+MPC, seed 15: 45.0398 seconds
+MPC, seed 16: 41.6045 seconds
+PI, seed 16: 59.3782 seconds
+PI, seed 17: 59.6917 seconds
+MPC, seed 17: 42.4503 seconds
+PI, seed 19: 53.8013 seconds
+MPC, seed 19: fails into obs
+PI, seed 23: 118.6142 seconds
+MPC, seed 23: 50.3879 seconds
+PI, seed many obs: 87.1828 seconds
+MPC, seed many obs: fail into obs
