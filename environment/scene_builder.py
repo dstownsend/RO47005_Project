@@ -404,7 +404,7 @@ def apply_scenario_to_env(env: UrdfEnv, scenario_cfg: dict, mid_wall_height = "l
             low=s_cfg.get("low"),
             high=s_cfg.get("high"),
             randomize=s_cfg.get("randomize", False),
-            seed=seed,
+            seed=seed+i,
         )
         env.add_obstacle(cyl)
         obstacles_dict["static"].append(

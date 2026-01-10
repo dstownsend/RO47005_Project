@@ -25,8 +25,8 @@ N_STEPS = 100000
 BASE_START = (4, 4)
 BASE_GOAL = (-4,-1)
 BASE_GOAL_ORIENTATION = 0 # degrees about global Z axis 
-BASE_CONTROLLER_MPC = True # True for MPC, False for PI
-RANDOM_SEED = None # None (randomize), or int. Set to get repeatable env.
+BASE_CONTROLLER_MPC = False # True for MPC, False for PI
+RANDOM_SEED = 14 # None (randomize), or int. Set to get repeatable env.
 
 BASE_POSE_FOR_ARM = [-4,-2.6]
 ARM_PICKUP = [-3.7, -3.1, 0.6]   
@@ -39,7 +39,7 @@ logger.setLevel(logging.INFO)
 
 def main():
 # 0. Setup environment
-    env, robots, obstacles = create_env_with_obstacles(scenario_name="many_static") #empty, one_static, dynamic_and_static # random_static
+    env, robots, obstacles = create_env_with_obstacles(scenario_name="random_static") #empty, one_static, dynamic_and_static # random_static
     ob, *_ = env.step(np.zeros(11))
 
     history = []

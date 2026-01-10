@@ -19,3 +19,16 @@ PI, seed 23: 118.6142 seconds
 MPC, seed 23: 50.3879 seconds
 PI, seed many obs: 87.1828 seconds
 MPC, seed many obs: fail into obs
+AFTER FIX
+MPC, seed 8: 58.2174 seconds
+PI, seed 8: 83.5223 seconds
+PI, seed 9: 57.2679 seconds
+MPC, seed 9: fail
+MPC, seed 10: 44.6981 seconds (good)
+PI, seed 10: 76.4457 seconds
+PI, seed 11: 51.7557 seconds
+MPC, seed 11: fail
+MPC, seed 12: 45.2934 seconds
+PI, seed 12: 69.2259 seconds
+MPC, seed 14: 42.6215 seconds
+PI, seed 14: 48.6104 seconds
