@@ -28,3 +28,17 @@ python3 examples/albert.py
 ```bash
 python3 main.py
 ```
+
+---
+
+## RRT Base Planner Parameters
+
+| Code Parameter | Value | Description |
+|---------------|-------|-------------|
+| `q` | 0.1 | Tree expansion step size. Maximum distance a new node is steered toward a sampled state per iteration. |
+| `r` | 0.01 | Goal tolerance radius. The planner terminates successfully when a node is within this Euclidean distance of the goal. |
+| `max_samples` | 1000 | Maximum number of sampled nodes allowed before declaring failure. |
+| `rewire_count` | 32 | Number of nearby nodes evaluated for rewiring in RRT* to improve path optimality. |
+| `prc` | 0.1 | Goal bias probability. Fraction of iterations in which the goal is directly sampled. |
+
+---
