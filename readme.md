@@ -1,36 +1,70 @@
-# Robot Planners
-Mobile manipulator (Albert robot) in pybullet environment. 
-- Motion planners for navigation around obstacles 
-- Motion planners for 7DoF arm movement
-## Setup
-1. Ubuntu22, python3.10, venv
-```bash
-sudo apt install python3-venv python3-pip
-git clone git@github.com:dstownsend/RO47005_Project.git
-cd RO47005_Project
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-```
-2. [Acados (for mpc)](https://docs.acados.org/python_interface/index.html#installation)
+# Project repo for RO47005 Group 43
+## Maintainers
+Lau Wei Cheng, Josh (6379184)  
+Plevier, Christian (5041120)  
+Sackmann, Luca (6376754)  
+Townsend, Dylan (6315577)
+
+## Setup and installation
+This project was developed with Ubuntu22, python3.10.
+1. Create venv and install python packages
+    ```bash
+    sudo apt install python3-venv python3-pip
+    git clone git@github.com:dstownsend/RO47005_Project.git
+    cd RO47005_Project
+    python3 -m venv venv
+    source venv/bin/activate
+    pip3 install -r requirements.txt
+    ```
+2. Install Acados following [this](https://docs.acados.org/installation/index.html) and [this](https://docs.acados.org/python_interface/index.html#installation) link.
+
+3. Install RRT library. 
+    ```bash
+    source venv/bin/activate # make sure venv is activated
+    git clone git@github.com:motion-planning/rrt-algorithms.git
+    cd rrt-algorithms
+    pip3 install .
+    ```
 
 ## Quickstart
-Remember to activate the venv before running the following commands.
-1. Run example env script
+1. Activate the venv
+    ```bash
+    source venv/bin/activate
+    ```
+2. Run main script. Pybullet should start and you should see the robot navigating through the env (see gif below)
+    ```bash
+    python3 main.py
+    ```
+TODO ADD GIF
+
+## Obstacle avoidance
+You can run the tests for obstacle avoidance in a standalone scenario (currently implemented in different branches).
+### Static obstacle avoidance
+Switch to the branch `feat/static-obs`. In `main.py`, ensure that `scenario_name="one_static"`, you can refer to and update the configurations [here](environment/scenarios.py).
 ```bash
-python3 examples/point_robot.py
+source venv/bin/activate
+git switch feat/static-obs
+python3 main.py
 ```
-1. Run example albert script. Press the arrow keys to move, ESC to quit.
+### Dynamic obstacle avoidance
+Switch to the branch `feat/dynamic-obs`. In `main.py`, ensure that `scenario_name="one_dynamic"`, you can refer to and update the configurations in `environment/scenarios.py`.
 ```bash
-python3 examples/albert.py
-```
-2. Run main script
-```bash
+source venv/bin/activate
+git switch feat/dynamic-obs
 python3 main.py
 ```
 
----
-
+### MPC Parameters
+The MPC implementation and parameters can be found [here](local_planners/mpc.py) 
+| Parameter | Description |
+|---------------|--------------------|
+| NUM_HORIZON_STEPS | Number of steps in planning horizon over total time horizon (next parameter) |
+| TIME_HORIZON_S | Total planning time horizon in seconds. |
+| Q_MAT | Cost (penalty) for tracking a position [x,y,angular displacement]|
+| Q_MAT_E | Cost for tracking the terminal state in the planning horizon |
+| R_MAT | Cost for control effort. [forward velocity, angular velocity] |
+| INFLATION_M | Inflation radius of obstacles in meters.|
+| OBS_SOFT_COST | Cost for hitting an obstacle |
 ## RRT Base Planner Parameters
 
 | Code Parameter | Value | Description |
