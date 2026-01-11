@@ -16,14 +16,14 @@ This project was developed with Ubuntu22, python3.10.
     source venv/bin/activate
     pip3 install -r requirements.txt
     ```
-2. Install Acados following [this](https://docs.acados.org/installation/index.html) and [this](https://docs.acados.org/python_interface/index.html#installation) link.
+2. Install Acados following [this](https://docs.acados.org/installation/index.html) and [this](https://docs.acados.org/python_interface/index.html#installation) link. Note that the first time you run Acados, you will get a prompt in your console "Do you wish to set up Tera renderer automatically?" Enter Y.
 
 3. Install RRT library. 
     ```bash
     source venv/bin/activate # make sure venv is activated
     git clone git@github.com:motion-planning/rrt-algorithms.git
     cd rrt-algorithms
-    pip3 install .
+    pip3 install -e .
     ```
 
 ## Quickstart
@@ -33,8 +33,10 @@ This project was developed with Ubuntu22, python3.10.
     ```
 2. Run main script. Pybullet should start and you should see the robot navigating through the env (see gif below)
     ```bash
-    python3 main.py
+    python3 main.py # from project root
     ```
+To see an image of the generated global path, set in `global_path = RRT_planner.plan(..., plot_bool=True)` in `main.py`.
+
 TODO ADD GIF
 
 ## Obstacle avoidance
