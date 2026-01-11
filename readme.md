@@ -35,9 +35,14 @@ This project was developed with Ubuntu22, python3.10.
     ```bash
     python3 main.py # from project root
     ```
-To see an image of the generated global path, set in `global_path = RRT_planner.plan(..., plot_bool=True)` in `main.py`.
+- To see an image of the generated global path, set in `global_path = RRT_planner.plan(..., plot_bool=True)` in `main.py`.
+- You may interact with the camera view in pybullet using mouse control (be careful not to accidently drag and move the robot)
+- More videos can be found at [this link](https://tud365-my.sharepoint.com/:f:/r/personal/lsackmann_tudelft_nl/Documents/RO47005_Project/Videos?csf=1&web=1&e=JciZgA) (log in required)
+![full run](media/MPC_Overall.gif)  
+*Top down view of base movement*
+![full run](media/RRT_MiddleWall.gif)  
+*Close up view of Manipulator task*
 
-TODO ADD GIF
 
 ## Obstacle avoidance
 You can run the tests for obstacle avoidance in a standalone scenario (currently implemented in different branches).

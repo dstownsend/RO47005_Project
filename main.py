@@ -25,7 +25,7 @@ N_STEPS = 100000
 BASE_START = (4, 4)
 BASE_GOAL = (-4,-1)
 BASE_GOAL_ORIENTATION = 0 # degrees about global Z axis 
-BASE_CONTROLLER_MPC = False # True for MPC, False for PI
+BASE_CONTROLLER_MPC = True # True for MPC, False for PI
 RANDOM_SEED = 14 # None (randomize), or int. Set to get repeatable env.
 
 BASE_POSE_FOR_ARM = [-4,-2.6]
@@ -306,8 +306,8 @@ def create_env_with_obstacles(
     # Camera perspectives
     #env.reconfigure_camera(8.0, 180.0, -90.01, (0, 0, 0)) # Birds Eye
     # env.reconfigure_camera(2.0, -50.0, -50.01, (4, 4, 0)) # Spawn Config Joints
-    # env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
-    env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
+    env.reconfigure_camera(8.0, 0.0, -90.01, (0, 0, 0)) # Birds Eye
+    # env.reconfigure_camera(2.0, -50.0, -50.01, (-4, -1, 0)) # Spawn Config Joints
     # env.reconfigure_camera(2.0, -0.0, 0.0, (4, 4, 1)) # Spawn Config Side
 
     spawn_boxes()
